@@ -1,12 +1,15 @@
 const path = require("path");
 const express = require("express");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 require("dotenv").config();
 
 const { answerFromResume, PORTFOLIO_SYSTEM } = require("./resumeAnswers");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 // Allow GitHub Pages (and local) to call the API on Render
 const ALLOWED_ORIGINS = new Set([
@@ -74,24 +77,20 @@ function validateInput(body) {
   return { data: { firstName, lastName, email, service, message } };
 }
 
-// Check if email config exists
+// Check if Resend email config exists (HTTPS API — works on Render; Gmail SMTP times out there)
 function checkEmailConfig() {
-  const requiredEnv = ["SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASS", "CONTACT_TO"];
+  const requiredEnv = ["RESEND_API_KEY", "CONTACT_TO"];
   const missing = requiredEnv.filter((key) => !process.env[key]);
-  return { ok: missing.length === 0, missing };
+  return { ok: missing.length === 0 && !!resend, missing };
 }
 
-// Create Nodemailer transporter
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT),
-    secure: String(process.env.SMTP_SECURE || "false").toLowerCase() === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+function getFromAddress() {
+  const fromName = process.env.CONTACT_FROM_NAME || "Portfolio Contact Form";
+  // Use a verified domain address in production, e.g. "Jhon <hello@yourdomain.com>"
+  // Until then, Resend's onboarding address works for testing (to your Resend account email).
+  const fromEmail = process.env.CONTACT_FROM || "onboarding@resend.dev";
+  if (fromEmail.includes("<")) return fromEmail;
+  return `${fromName} <${fromEmail}>`;
 }
 
 // Contact form route
@@ -110,10 +109,9 @@ app.post("/api/contact", async (req, res) => {
   const { firstName, lastName, email, service, message } = validated.data;
   const fullName = `${firstName} ${lastName}`.trim();
   const safeMessageHtml = escapeHtml(message).replace(/\n/g, "<br>");
-  const fromName = process.env.CONTACT_FROM_NAME || "Portfolio Contact Form";
 
- const mailOptions = {
-  from: `"${fromName}" <${process.env.SMTP_USER}>`,
+  const mailOptions = {
+  from: getFromAddress(),
   to: process.env.CONTACT_TO,
   replyTo: email,
   subject: `New Inquiry from ${fullName} — ${service}`,
@@ -243,8 +241,14 @@ app.post("/api/contact", async (req, res) => {
 };
 
   try {
-    const transporter = createTransporter();
-    await transporter.sendMail(mailOptions);
+    const { data, error } = await resend.emails.send(mailOptions);
+    if (error) {
+      console.error("Failed to send contact email:", error);
+      return res.status(500).json({
+        message: "Unable to send message right now. Please try again later.",
+      });
+    }
+    console.log("Contact email sent:", data?.id || "ok");
     return res.status(200).json({ message: "Message sent successfully." });
   } catch (error) {
     console.error("Failed to send contact email:", error);
