@@ -1,0 +1,2300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jhon Elopre — elopre.dev</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+<style>
+  :root {
+    --white:       #ffffff;
+    --off-white:   #f4f6fb;
+    --bg:          #eef1f8;
+    --black:       #070810;
+    --navy:        #0d1b3e;
+    --navy-mid:    #172554;
+    --navy-light:  #1e3a8a;
+    --blue:        #2563eb;
+    --blue-soft:   #3b82f6;
+    --blue-pale:   #dbeafe;
+    --text:        #0f172a;
+    --text-muted:  #64748b;
+    --border:      #e2e8f0;
+    --border-dark: #cbd5e1;
+    --surface:     #f1f5f9;
+    --sidebar-w:   260px;
+    --radius:      22px;
+    --radius-sm:   14px;
+    --shadow:      0 4px 24px rgba(13, 27, 62, 0.06);
+    --font:        'Outfit', sans-serif;
+  }
+
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+  a { color: inherit; }
+  button, input, select, textarea { font-family: inherit; }
+
+  /* Topo-like subtle lines */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 70% -10%, rgba(37,99,235,0.08), transparent),
+      url("data:image/svg+xml,%3Csvg width='120' height='120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 60c20-20 40 20 60 0s40-20 60 0M0 30c20-20 40 20 60 0s40-20 60 0M0 90c20-20 40 20 60 0s40-20 60 0' fill='none' stroke='%23cbd5e1' stroke-width='0.8' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ══════════════════════════════
+     LOADER
+  ══════════════════════════════ */
+  #loader {
+    position: fixed; inset: 0;
+    background: var(--white);
+    z-index: 10000;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  #loader::before {
+    content: ''; position: absolute;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(37,99,235,0.06) 0%, transparent 65%);
+    border-radius: 50%; pointer-events: none;
+  }
+  @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+  .loader-done { animation: fadeOut 0.6s ease 3.1s forwards; }
+
+  .loader-core {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0;
+    position: relative; z-index: 2;
+    animation: fadeUp 0.7s ease forwards; opacity: 0;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-spinner-wrap {
+    position: relative;
+    width: 100px; height: 100px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 28px;
+  }
+  .loader-logo-box {
+    width: 72px; height: 72px;
+    border-radius: 16px;
+    border: 1px solid var(--border-dark);
+    background: var(--off-white); overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 12px rgba(30,58,138,0.08);
+    position: relative; z-index: 1;
+  }
+  .loader-logo-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .loader-spinner {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotateZ(45deg);
+    perspective: 1000px; border-radius: 50%;
+    width: 100px; height: 100px; color: var(--navy-light); z-index: 3;
+  }
+  .loader-spinner:before, .loader-spinner:after {
+    content: ''; display: block; position: absolute;
+    top: 0; left: 0; width: inherit; height: inherit;
+    border-radius: 50%; transform: rotateX(70deg);
+    animation: 1s spin linear infinite;
+  }
+  .loader-spinner:after { color: var(--blue); transform: rotateY(70deg); animation-delay: .4s; }
+  @keyframes spin {
+    0%,100% { box-shadow: .2em 0px 0 0px currentcolor; }
+    12% { box-shadow: .2em .2em 0 0 currentcolor; }
+    25% { box-shadow: 0 .2em 0 0px currentcolor; }
+    37% { box-shadow: -.2em .2em 0 0 currentcolor; }
+    50% { box-shadow: -.2em 0 0 0 currentcolor; }
+    62% { box-shadow: -.2em -.2em 0 0 currentcolor; }
+    75% { box-shadow: 0px -.2em 0 0 currentcolor; }
+    87% { box-shadow: .2em -.2em 0 0 currentcolor; }
+  }
+
+  .loader-brand {
+    font-size: 1.5rem; font-weight: 800;
+    letter-spacing: -0.03em; color: var(--navy); margin-bottom: 18px;
+  }
+  .loader-brand em { font-style: normal; color: var(--blue); }
+
+  .loader-status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .loader-dots { display: flex; gap: 5px; }
+  .loader-dots span {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--navy-light); display: block;
+    animation: dotBounce 1.2s ease infinite;
+  }
+  .loader-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .loader-dots span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes dotBounce {
+    0%,80%,100% { transform: scale(0.6); opacity: 0.3; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+  .loader-status-text {
+    font-size: 0.7rem; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+  }
+
+  .loader-pct-row { display: flex; align-items: center; gap: 14px; }
+  .loader-bar-track { width: 200px; height: 1.5px; background: var(--border); position: relative; overflow: hidden; }
+  .loader-bar-fill {
+    position: absolute; inset: 0 100% 0 0;
+    background: linear-gradient(90deg, var(--navy-light), var(--blue-soft));
+    animation: barSweep 2.6s cubic-bezier(0.65,0,0.35,1) 0.3s forwards;
+  }
+  @keyframes barSweep { 0%{inset:0 100% 0 0;} 80%{inset:0 4% 0 0;} 100%{inset:0 0 0 0;} }
+  .loader-pct-num {
+    font-size: 0.7rem; font-weight: 600;
+    letter-spacing: 0.08em; color: var(--text-muted); min-width: 32px; text-align: right;
+  }
+
+  /* ══════════════════════════════
+     SHELL
+  ══════════════════════════════ */
+  .app {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Mobile top bar */
+  .mobile-bar {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    height: 60px; padding: 0 1rem;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    align-items: center; justify-content: space-between;
+  }
+  .mobile-bar-brand {
+    display: flex; align-items: center; gap: 0.55rem;
+    font-weight: 700; font-size: 0.95rem; color: var(--navy); text-decoration: none;
+  }
+  .mobile-bar-brand img { width: 28px; height: 28px; border-radius: 8px; }
+  .menu-btn {
+    width: 42px; height: 42px; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--white);
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+  }
+  .menu-btn svg { stroke: var(--navy); fill: none; width: 20px; height: 20px; stroke-width: 1.8; }
+  .sidebar-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(13,27,62,0.4);
+    z-index: 240; opacity: 0; pointer-events: none; transition: opacity .3s;
+  }
+  .sidebar-overlay.open { opacity: 1; pointer-events: all; }
+
+  /* ══════════════════════════════
+     SIDEBAR
+  ══════════════════════════════ */
+  .sidebar {
+    position: sticky; top: 0; height: 100vh;
+    padding: 1.75rem 1.25rem;
+    display: flex; flex-direction: column;
+    background: transparent;
+    z-index: 50;
+  }
+  .sidebar-card {
+    flex: 1;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem 1.15rem;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+
+  .profile {
+    text-align: center;
+    padding-bottom: 1.35rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 1.1rem;
+  }
+  .profile-avatar {
+    width: 96px; height: 96px; border-radius: 50%;
+    margin: 0 auto 0.85rem; overflow: hidden;
+    border: 2px solid #dbeafe;
+    background: #e2e8f0;
+    position: relative;
+  }
+  .profile-avatar img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center 15%;
+    display: block;
+  }
+  .profile-avatar .ph { display: none; }
+  .profile-name {
+    font-size: 1.08rem; font-weight: 700; color: var(--navy);
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    justify-content: center; line-height: 1.2;
+  }
+  .profile-name svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .profile-role {
+    font-size: 0.82rem; color: #64748b; margin-top: 0.3rem; font-weight: 400;
+  }
+  .profile-socials {
+    display: flex; justify-content: center; gap: 0.55rem; margin-top: 0.95rem;
+  }
+  .profile-socials a {
+    width: 34px; height: 34px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--off-white);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s, background .2s, transform .2s;
+  }
+  .profile-socials a:hover {
+    border-color: var(--blue); background: var(--blue-pale); transform: translateY(-2px);
+  }
+  .profile-socials img { width: 16px; height: 16px; }
+
+  .side-nav { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
+  .side-nav a {
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.7rem 0.85rem; border-radius: 12px;
+    text-decoration: none; color: var(--text-muted);
+    font-size: 0.9rem; font-weight: 500;
+    transition: background .2s, color .2s;
+  }
+  .side-nav a svg {
+    width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; flex-shrink: 0;
+  }
+  .side-nav a:hover { color: var(--navy); background: var(--off-white); }
+  .side-nav a.active {
+    color: var(--blue);
+    background: rgba(37,99,235,0.08);
+  }
+  .side-nav a.active svg { stroke: var(--blue); }
+
+  .sidebar-foot {
+    margin-top: auto; padding-top: 1rem;
+    font-size: 0.68rem; color: var(--text-muted); text-align: center; line-height: 1.5;
+  }
+
+  /* ══════════════════════════════
+     MAIN
+  ══════════════════════════════ */
+  .main {
+    padding: 1.5rem 1.75rem 2rem 0.75rem;
+    min-width: 0;
+  }
+  .panel { display: none; animation: panelIn .35s ease; }
+  .panel.active { display: block; }
+  @keyframes panelIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  /* Home hero row */
+  .home-top {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 1.5rem; margin-bottom: 1.25rem; padding: 0.35rem 0.25rem 0;
+  }
+  .home-headline {
+    font-size: clamp(1.85rem, 3.2vw, 2.65rem);
+    font-weight: 800; letter-spacing: -0.04em; line-height: 1.12;
+    color: var(--navy); max-width: 14ch;
+  }
+  .home-sub {
+    margin-top: 0.65rem; font-size: 0.95rem; font-weight: 400;
+    color: var(--text-muted); max-width: 42ch; line-height: 1.6;
+  }
+  .btn-pill {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    background: var(--navy); color: var(--white);
+    padding: 0.8rem 1.35rem; border-radius: 999px;
+    text-decoration: none; font-weight: 600; font-size: 0.9rem;
+    white-space: nowrap; flex-shrink: 0;
+    transition: background .2s, transform .2s;
+    border: none; cursor: pointer;
+  }
+  .btn-pill:hover { background: var(--blue); transform: translateY(-1px); }
+  .btn-pill svg { width: 16px; height: 16px; stroke: var(--blue-soft); fill: none; stroke-width: 1.8; }
+
+  /* Tools strip */
+  .tools-bar {
+    padding: 1rem 1.35rem;
+    margin-bottom: 1.15rem;
+    display: flex; align-items: center; gap: 1.25rem;
+    overflow: hidden;
+  }
+  .tools-label {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text-muted); white-space: nowrap;
+    flex-shrink: 0; z-index: 1;
+  }
+  .tools-marquee {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+  .tools-track {
+    display: flex;
+    width: max-content;
+    gap: 0;
+    animation: toolsScroll 22s linear infinite;
+  }
+  .tools-marquee:hover .tools-track { animation-play-state: paused; }
+  .tools-row {
+    display: flex; align-items: center; gap: 0.55rem;
+    flex-shrink: 0; padding-right: 0.55rem;
+  }
+  .tool-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.4rem 0.7rem; border-radius: 999px;
+    background: var(--off-white); border: 1px solid var(--border);
+    font-size: 0.78rem; font-weight: 500; color: var(--navy);
+    white-space: nowrap;
+  }
+  .tool-chip img { width: 16px; height: 16px; }
+  @keyframes toolsScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tools-track { animation: none; }
+  }
+
+  /* Bento */
+  .bento {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 1rem;
+  }
+  .bento-card {
+    padding: 1.25rem;
+    display: flex; flex-direction: column;
+    min-height: 0;
+    transition: transform .25s ease, box-shadow .25s ease;
+    text-decoration: none; color: inherit;
+    cursor: pointer;
+  }
+  .bento-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 36px rgba(13, 27, 62, 0.1);
+  }
+  .bento-head {
+    display: flex; align-items: flex-start; gap: 0.65rem; margin-bottom: 0.85rem;
+  }
+  .bento-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--blue-pale); color: var(--blue);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .bento-icon svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+  .bento-title {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--navy);
+  }
+  .bento-desc {
+    font-size: 0.8rem; color: var(--text-muted); line-height: 1.45; margin-top: 0.15rem;
+  }
+
+  .bento-projects { grid-column: 1; grid-row: 1; min-height: 280px; }
+  .bento-about { grid-column: 2; grid-row: 1; }
+  .bento-stack { grid-column: 3; grid-row: 1; }
+  .bento-creds { grid-column: 1; grid-row: 2; min-height: 200px; }
+  .bento-services { grid-column: 2; grid-row: 2; }
+  .bento-highlights { grid-column: 3; grid-row: 2; }
+
+  .bento-preview {
+    flex: 1; margin-top: 0.5rem; border-radius: var(--radius-sm);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    overflow: hidden; position: relative;
+    min-height: 160px;
+  }
+  .bento-carousel {
+    position: absolute; inset: 0;
+  }
+  .bento-carousel-track {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+  }
+  .bento-carousel-track .slide {
+    flex: 0 0 100%;
+    height: 100%;
+    position: relative;
+  }
+  .bento-carousel-track .slide img,
+  .bento-carousel-track .slide video {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .bento-carousel-track .slide .slide-label {
+    position: absolute; left: 10px; top: 10px;
+    padding: 0.3rem 0.65rem; border-radius: 999px;
+    background: rgba(13,27,62,0.78); color: #fff;
+    font-size: 0.68rem; font-weight: 600;
+    backdrop-filter: blur(6px);
+    z-index: 1;
+  }
+  .bento-carousel-dots {
+    position: absolute; left: 0; right: 0; bottom: 10px;
+    display: flex; justify-content: center; gap: 6px;
+    z-index: 2; pointer-events: none;
+  }
+  .bento-carousel-dots span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    border: 1px solid rgba(13,27,62,0.2);
+    transition: transform .2s, background .2s;
+  }
+  .bento-carousel-dots span.active {
+    background: var(--blue); transform: scale(1.2);
+  }
+  .bento-carousel-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    z-index: 3; width: 28px; height: 28px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,0.9);
+    color: var(--navy); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 10px rgba(13,27,62,0.15);
+    opacity: 0; transition: opacity .2s;
+  }
+  .bento-carousel:hover .bento-carousel-nav { opacity: 1; }
+  .bento-carousel-nav.prev { left: 8px; }
+  .bento-carousel-nav.next { right: 8px; }
+  .bento-carousel-nav svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+  .about-illus {
+    flex: 1; margin-top: 0.4rem; border-radius: var(--radius-sm);
+    background: linear-gradient(160deg, #eff6ff, #dbeafe 50%, #bfdbfe);
+    min-height: 160px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding: 1rem;
+  }
+  .about-illus img {
+    width: 85%; max-width: 180px; height: auto;
+    object-fit: contain; display: block;
+  }
+
+  .stack-pills-bento {
+    display: flex; flex-wrap: wrap; gap: 0.45rem; margin-top: 0.5rem;
+  }
+  .stack-pills-bento span {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.4rem 0.75rem; border-radius: 999px;
+    background: var(--off-white); border: 1px solid var(--border);
+    font-size: 0.75rem; font-weight: 500; color: var(--navy-light);
+  }
+  .stack-pills-bento span img {
+    width: 14px; height: 14px; object-fit: contain;
+  }
+
+  .cred-wrap {
+    flex: 1; display: flex; align-items: center; justify-content: center;
+    margin-top: 0.5rem;
+  }
+  .cred-badge {
+    width: 130px; height: 130px; border-radius: 50%;
+    border: 2px dashed var(--blue);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 40% 35%, var(--blue-pale), var(--white));
+    text-align: center; padding: 0.75rem;
+  }
+  .cred-badge strong {
+    font-size: 0.85rem; color: var(--navy); line-height: 1.2; font-weight: 700;
+  }
+  .cred-badge span {
+    font-size: 0.65rem; color: var(--text-muted); margin-top: 0.25rem;
+  }
+
+  .svc-list { margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.55rem; }
+  .svc-row {
+    display: flex; align-items: center; gap: 0.55rem;
+    padding: 0.55rem 0; border-bottom: 1px solid var(--border);
+    font-size: 0.88rem; font-weight: 500; color: var(--navy);
+  }
+  .svc-row:last-child { border-bottom: none; }
+  .svc-num {
+    font-size: 0.7rem; font-weight: 700; color: var(--blue);
+    min-width: 1.4rem;
+  }
+  .svc-icon-sm {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--blue-pale); color: var(--blue);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .svc-icon-sm svg {
+    width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.7;
+  }
+
+  .hl-list { margin-top: 0.35rem; display: flex; flex-direction: column; gap: 0.7rem; }
+  .hl-item { display: flex; gap: 0.7rem; align-items: flex-start; }
+  .hl-icon {
+    width: 32px; height: 32px; border-radius: 9px;
+    background: var(--blue-pale); color: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .hl-icon svg {
+    width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.7;
+  }
+  .hl-item strong { display: block; font-size: 0.85rem; color: var(--navy); font-weight: 600; }
+  .hl-item span { font-size: 0.75rem; color: var(--text-muted); line-height: 1.4; }
+
+  /* Section panels */
+  .panel-head {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 1rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+    padding: 0.25rem 0.15rem 0;
+  }
+  .panel-head h2 {
+    font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+    font-weight: 800; letter-spacing: -0.03em; color: var(--navy);
+  }
+  .panel-head p { color: var(--text-muted); font-size: 0.9rem; max-width: 40ch; }
+
+  .section-card { padding: 1.5rem; }
+
+  /* Services grid */
+  .services-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+  }
+  .service-item {
+    padding: 1.35rem; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--off-white);
+    transition: border-color .2s, background .2s;
+  }
+  .service-item:hover { border-color: var(--blue-soft); background: var(--white); }
+  .service-num { font-size: 0.75rem; font-weight: 700; color: var(--blue); margin-bottom: 0.75rem; }
+  .service-icon {
+    width: 40px; height: 40px; stroke: var(--navy-light); fill: none; stroke-width: 1.4;
+    margin-bottom: 0.85rem;
+  }
+  .service-name { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.45rem; }
+  .service-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+
+  /* Stack */
+  .stack-categories { display: flex; flex-direction: column; gap: 1.15rem; }
+  .stack-cat-name {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.55rem;
+  }
+  .stack-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    padding: 0.5rem 0.85rem; border-radius: 999px;
+    background: var(--off-white); border: 1px solid var(--border);
+    font-size: 0.82rem; font-weight: 500; color: var(--navy);
+  }
+  .pill-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
+  .pill-icon img { width: 18px; height: 18px; object-fit: contain; }
+
+  /* About panel */
+  .about-grid {
+    display: grid; grid-template-columns: 1fr 1.2fr; gap: 1.5rem; align-items: stretch;
+  }
+  .about-visual-card {
+    border-radius: var(--radius);
+    background: var(--white);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    padding: 2rem; color: var(--navy);
+    display: flex; flex-direction: column; justify-content: space-between;
+    min-height: 380px; position: relative; overflow: hidden;
+  }
+  .about-visual-card::after {
+    content: ''; position: absolute; right: -40px; bottom: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    background: rgba(37, 99, 235, 0.08);
+  }
+  .about-badge {
+    display: inline-flex; align-self: flex-start;
+    padding: 0.35rem 0.75rem; border-radius: 999px;
+    background: var(--blue-pale); color: var(--navy-light);
+    font-size: 0.75rem; font-weight: 600;
+    position: relative; z-index: 1;
+  }
+  .about-logo-wrap {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; justify-content: center;
+    flex: 1; padding: 1rem 0;
+    background: transparent;
+  }
+  .about-logo-wrap img {
+    width: min(100%, 420px);
+    height: auto;
+    max-height: 280px;
+    object-fit: contain;
+    display: block;
+    background: transparent;
+  }
+  .about-stats { display: flex; gap: 1.5rem; position: relative; z-index: 1; }
+  .about-stats strong { display: block; font-size: 1.6rem; font-weight: 800; color: var(--navy); }
+  .about-stats span { font-size: 0.75rem; color: var(--text-muted); }
+  .about-text { font-size: 0.95rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 1rem; }
+  .about-list { list-style: none; display: flex; flex-direction: column; gap: 0.55rem; }
+  .about-list li {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.9rem; font-weight: 500; color: var(--navy);
+  }
+  .about-list li::before {
+    content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0;
+  }
+
+  /* Projects */
+  .projects-filter { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .filter-btn {
+    font-size: 0.75rem; font-weight: 600; padding: 0.45rem 0.9rem;
+    border-radius: 999px; border: 1px solid var(--border);
+    background: var(--white); color: var(--text-muted); cursor: pointer;
+    transition: all .2s;
+  }
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--navy); color: var(--white); border-color: var(--navy);
+  }
+  .projects-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem;
+  }
+  .project-card {
+    border: 1px solid var(--border); background: var(--white);
+    border-radius: var(--radius); overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: box-shadow .3s, transform .3s;
+  }
+  .project-card:hover {
+    box-shadow: 0 14px 40px rgba(13,27,62,0.1);
+    transform: translateY(-3px);
+  }
+  .project-img {
+    width: 100%; height: 170px; overflow: hidden; position: relative;
+    background: var(--surface); flex-shrink: 0;
+  }
+  .project-img > img.project-cover {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    position: absolute; inset: 0; z-index: 1;
+  }
+  .project-img img.project-cover { transition: transform .45s; }
+  .project-card:hover .project-img img.project-cover { transform: scale(1.05); }
+  .project-img-ph {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.5rem;
+    position: relative; z-index: 0;
+  }
+  .project-img-ph svg { opacity: 0.2; }
+  .project-img-ph span {
+    font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted); font-weight: 600;
+  }
+  .project-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; }
+  .project-meta { display: flex; justify-content: space-between; margin-bottom: 0.65rem; }
+  .project-cat {
+    font-size: 0.65rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--blue); background: var(--blue-pale); padding: 0.2rem 0.55rem; border-radius: 999px;
+  }
+  .project-year { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
+  .project-name { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.4rem; }
+  .project-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 0.9rem; }
+  .project-tags { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .project-tag {
+    font-size: 0.65rem; font-weight: 500; color: var(--text-muted);
+    border: 1px solid var(--border); padding: 0.2rem 0.5rem; border-radius: 999px;
+    background: var(--off-white);
+  }
+  .project-type {
+    font-size: 0.65rem; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 0.35rem; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  /* Video modal */
+
+  /* Resume banner */
+  #resume-banner {
+    margin-top: 1rem; padding: 1.75rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1.5rem;
+    background: linear-gradient(120deg, var(--navy), var(--navy-mid));
+    border-radius: var(--radius); color: white; flex-wrap: wrap;
+  }
+  .rb-tag { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.4rem; }
+  .rb-title { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; }
+  .rb-title em { font-style: normal; color: var(--blue-soft); }
+  .rb-sub { margin-top: 0.5rem; font-size: 0.88rem; opacity: 0.75; max-width: 42ch; line-height: 1.55; }
+  .rb-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .btn-download {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: var(--white); color: var(--navy); padding: 0.75rem 1.2rem;
+    border-radius: 999px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+  }
+  .btn-download svg { stroke: currentColor; fill: none; width: 16px; height: 16px; stroke-width: 1.5; }
+  .btn-view-work {
+    display: inline-flex; align-items: center;
+    color: white; padding: 0.75rem 1.2rem; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.25); text-decoration: none;
+    font-weight: 600; font-size: 0.85rem;
+  }
+
+  /* Contact */
+  .contact-grid {
+    display: grid; grid-template-columns: 1fr 1.1fr; gap: 1.25rem;
+  }
+  .contact-info p {
+    color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin: 0.75rem 0 1.25rem;
+  }
+  .contact-details { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.25rem; }
+  .contact-detail { display: flex; gap: 0.75rem; align-items: flex-start; }
+  .cd-icon {
+    width: 38px; height: 38px; border-radius: 10px; background: var(--blue-pale);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .cd-icon svg { width: 18px; height: 18px; stroke: var(--blue); fill: none; stroke-width: 1.5; }
+  .cd-label { display: block; font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
+  .cd-value { font-size: 0.9rem; font-weight: 600; color: var(--navy); text-decoration: none; }
+  .contact-socials { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .social-pill {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.45rem 0.8rem; border-radius: 999px;
+    border: 1px solid var(--border); background: var(--off-white);
+    text-decoration: none; font-size: 0.8rem; font-weight: 500; color: var(--navy);
+  }
+  .social-icon { width: 14px; height: 14px; }
+  .form-title { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
+  .form-group { margin-bottom: 0.85rem; }
+  .form-group label {
+    display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
+    margin-bottom: 0.35rem;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 0.7rem 0.9rem; border-radius: 12px;
+    border: 1px solid var(--border-dark); background: var(--off-white);
+    font-size: 0.9rem; color: var(--text); outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.12); background: white;
+  }
+  .form-group textarea { min-height: 110px; resize: vertical; }
+  .form-submit {
+    width: 100%; margin-top: 0.35rem;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    background: var(--navy); color: white; border: none; border-radius: 999px;
+    padding: 0.85rem 1.25rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: background .2s;
+  }
+  .form-submit:hover { background: var(--blue); }
+  .form-submit svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .form-success {
+    display: none; text-align: center; padding: 2rem 1rem; color: var(--navy);
+    font-weight: 600;
+  }
+  .form-success svg { stroke: var(--blue); margin-bottom: 0.75rem; }
+
+  .panel-footer {
+    margin-top: 1.5rem; text-align: center;
+    font-size: 0.75rem; color: var(--text-muted);
+  }
+
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ══════════════════════════════
+     CHATBOT
+  ══════════════════════════════ */
+  #chat-toggle {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 9000;
+    width: 58px; height: 58px; background: var(--navy-light);
+    border: none; border-radius: 18px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 32px rgba(30,58,138,0.35);
+    transition: background 0.3s ease, transform 0.3s ease;
+    overflow: hidden;
+  }
+  #chat-toggle:hover { background: var(--blue); transform: scale(1.08); }
+  #chat-toggle .chat-icon, #chat-toggle .close-icon {
+    position: absolute; transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  #chat-toggle .close-icon { opacity: 0; transform: rotate(90deg) scale(0.7); }
+  #chat-toggle.open .chat-icon { opacity: 0; transform: rotate(-90deg) scale(0.7); }
+  #chat-toggle.open .close-icon { opacity: 1; transform: rotate(0deg) scale(1); }
+  .chat-badge {
+    position: absolute; top: 8px; right: 8px; width: 10px; height: 10px;
+    background: #22c55e; border-radius: 50%; border: 2px solid var(--white);
+    animation: blink 2s ease infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.2;} }
+  #chat-toggle.open .chat-badge { display: none; }
+
+  #chat-window {
+    position: fixed; bottom: 6.5rem; right: 2rem; z-index: 8999;
+    width: 380px; height: 580px; background: var(--white);
+    border: 1px solid var(--border-dark); border-radius: 20px;
+    box-shadow: 0 24px 64px rgba(13,27,62,0.18);
+    display: flex; flex-direction: column;
+    transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none;
+    transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform-origin: bottom right; overflow: hidden;
+  }
+  #chat-window.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
+
+  .chat-header {
+    background: var(--navy); padding: 1.2rem 1.5rem;
+    display: flex; align-items: center; gap: 1rem; flex-shrink: 0;
+  }
+  .chat-avatar {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--navy-light), var(--blue));
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; position: relative;
+  }
+  .chat-avatar-dot {
+    position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px;
+    background: #22c55e; border-radius: 50%; border: 2px solid var(--navy);
+  }
+  .chat-header-info { flex: 1; }
+  .chat-header-name { font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 3px; }
+  .chat-header-status { font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; color: #22c55e; font-weight: 600; }
+  .chat-header-tag {
+    font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.25rem 0.55rem; border-radius: 999px; font-weight: 600;
+  }
+
+  #chat-messages {
+    flex: 1; overflow-y: auto; padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  #chat-messages::-webkit-scrollbar { width: 4px; }
+  #chat-messages::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-end;
+    width: 100%;
+    opacity: 1;
+    animation: msgIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .msg.user {
+    flex-direction: row-reverse;
+    justify-content: flex-start;
+  }
+  .msg.bot { justify-content: flex-start; }
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+
+  .msg-avatar {
+    width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .msg.bot .msg-avatar {
+    background: var(--navy-light); color: white; padding: 5px; overflow: hidden; border-radius: 10px;
+  }
+  .msg.bot .msg-avatar img { width: 100%; height: 100%; object-fit: contain; filter: brightness(10); display: block; }
+  .msg.user .msg-avatar {
+    background: var(--navy);
+    color: #fff;
+    border: 2px solid var(--blue-soft);
+    box-shadow: 0 2px 8px rgba(13,27,62,0.2);
+  }
+  .msg.user .msg-avatar svg { width: 15px; height: 15px; display: block; }
+
+  .msg-content {
+    display: flex;
+    flex-direction: column;
+    max-width: min(78%, 260px);
+    min-width: 0;
+  }
+  .msg.user .msg-content { align-items: flex-end; }
+  .msg.bot .msg-content { align-items: flex-start; }
+
+  .msg-bubble {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    padding: 0.7rem 0.95rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--text);
+    border: 1px solid var(--border);
+    background: var(--off-white);
+    border-radius: 14px 14px 14px 4px;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
+  }
+  .msg.user .msg-bubble {
+    background: var(--navy);
+    color: #fff;
+    border-color: var(--navy);
+    border-radius: 14px 14px 4px 14px;
+    box-shadow: 0 4px 14px rgba(13,27,62,0.22);
+  }
+  .msg-time {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    padding: 0 2px;
+  }
+  .msg.user .msg-time { text-align: right; color: var(--text-muted); }
+
+  .typing-indicator {
+    display: flex; gap: 0.6rem; align-items: flex-end;
+    opacity: 0; animation: msgIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.05s forwards;
+  }
+  .typing-dots {
+    background: var(--off-white); border: 1px solid var(--border); border-radius: 14px;
+    padding: 0.75rem 1rem; display: flex; align-items: center; gap: 5px; height: 40px;
+  }
+  .typing-dots span {
+    width: 5px; height: 5px; border-radius: 50%; background: var(--text-muted);
+    animation: typingDot 1.2s ease infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingDot {
+    0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+  }
+
+  .chat-suggestions { padding: 0 1.25rem 1rem; display: flex; flex-wrap: wrap; gap: 0.45rem; flex-shrink: 0; }
+  .suggestion-chip {
+    font-size: 0.7rem; font-weight: 500; color: var(--navy-light);
+    border: 1px solid var(--blue-pale); background: var(--blue-pale);
+    padding: 0.35rem 0.7rem; border-radius: 999px; cursor: pointer; transition: all 0.2s;
+  }
+  .suggestion-chip:hover { background: var(--navy-light); color: white; border-color: var(--navy-light); }
+
+  .chat-input-area {
+    padding: 1rem 1.25rem; border-top: 1px solid var(--border);
+    display: flex; gap: 0.6rem; align-items: flex-end; background: var(--white); flex-shrink: 0;
+  }
+  #chat-input {
+    flex: 1; padding: 0.7rem 0.9rem; border: 1px solid var(--border-dark);
+    background: var(--off-white); color: var(--text); font-size: 0.875rem;
+    outline: none; resize: none; min-height: 40px; max-height: 100px;
+    border-radius: 12px; line-height: 1.5;
+  }
+  #chat-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); background: white; }
+  #chat-send {
+    width: 40px; height: 40px; background: var(--navy-light); border: none; border-radius: 12px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  #chat-send:hover { background: var(--blue); }
+  #chat-send:disabled { background: var(--surface); cursor: not-allowed; }
+  #chat-send svg { stroke: white; fill: none; width: 16px; height: 16px; stroke-width: 1.8; }
+  #chat-send:disabled svg { stroke: var(--text-muted); }
+  .chat-powered {
+    text-align: center; padding: 0.4rem; font-size: 0.55rem; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted); border-top: 1px solid var(--border);
+    background: var(--off-white); flex-shrink: 0; font-weight: 600;
+  }
+  .chat-powered em { color: var(--blue); font-style: normal; }
+
+  /* ══════════════════════════════
+     RESPONSIVE
+  ══════════════════════════════ */
+  @media (max-width: 1100px) {
+    .bento { grid-template-columns: 1fr 1fr; }
+    .bento-projects { grid-column: 1 / -1; grid-row: auto; }
+    .bento-about, .bento-stack, .bento-creds, .bento-services, .bento-highlights {
+      grid-column: auto; grid-row: auto;
+    }
+    .projects-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .mobile-bar { display: flex; }
+    .sidebar-overlay { display: block; }
+    .sidebar {
+      position: fixed; top: 0; left: 0; height: 100%; width: min(300px, 86vw);
+      z-index: 250; padding: 1rem; transform: translateX(-105%);
+      transition: transform .3s ease;
+    }
+    .sidebar.open { transform: translateX(0); }
+    .main { padding: 4.75rem 1rem 2rem; }
+    .home-top { flex-direction: column; align-items: flex-start; }
+    .bento { grid-template-columns: 1fr; }
+    .services-grid, .about-grid, .contact-grid, .projects-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    #chat-window { width: calc(100vw - 2rem); right: 1rem; bottom: 5.5rem; }
+    #chat-toggle { right: 1rem; bottom: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════ LOADER ══════ -->
+<div id="loader">
+  <div class="loader-core">
+    <div class="logo-spinner-wrap">
+      <div class="loader-spinner"></div>
+      <div class="loader-logo-box">
+        <img src="assets/images/logonobg.svg" alt="elopre.dev logo">
+      </div>
+    </div>
+    <div class="loader-brand">elopre<em>.dev</em></div>
+    <div class="loader-status-row">
+      <div class="loader-dots"><span></span><span></span><span></span></div>
+      <span class="loader-status-text" id="loaderStatus">Initialising</span>
+    </div>
+    <div class="loader-pct-row">
+      <div class="loader-bar-track"><div class="loader-bar-fill"></div></div>
+      <span class="loader-pct-num" id="loaderPct">0%</span>
+    </div>
+  </div>
+</div>
+
+<div class="mobile-bar">
+  <a href="#" class="mobile-bar-brand" data-nav="home">
+    <img src="assets/images/logo.svg" alt="">
+    elopre.dev
+  </a>
+  <button class="menu-btn" id="menuBtn" aria-label="Open menu">
+    <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+</div>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app">
+  <!-- ══════ SIDEBAR ══════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-card">
+      <div class="profile">
+        <div class="profile-avatar">
+          <img src="assets/images/unnamed.jpg" alt="Jhon Elopre">
+        </div>
+        <div class="profile-name">
+          Jhon Elopre
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="#2563eb"/><path d="M5 8.2l2 2 4-4" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="profile-role">Full-Stack Developer</div>
+        <div class="profile-socials">
+          <a href="https://github.com/eloprejhon713?tab=repositories" target="_blank" rel="noopener" aria-label="GitHub">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="">
+          </a>
+          <a href="https://www.linkedin.com/in/jhon-elopre-083778369/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="">
+          </a>
+          <a href="https://www.facebook.com/tamesa2014" target="_blank" rel="noopener" aria-label="Facebook">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="">
+          </a>
+          <a href="https://www.instagram.com/itsmepotchy/" target="_blank" rel="noopener" aria-label="Instagram">
+            <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="">
+          </a>
+        </div>
+      </div>
+
+      <nav class="side-nav" id="sideNav">
+        <a href="#home" class="active" data-nav="home">
+          <svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1v-9.5z"/></svg>
+          Home
+        </a>
+        <a href="#projects" data-nav="projects">
+          <svg viewBox="0 0 24 24"><path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          Projects
+        </a>
+        <a href="#services" data-nav="services">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          Services
+        </a>
+        <a href="#stack" data-nav="stack">
+          <svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 16l9 5 9-5"/></svg>
+          Stack
+        </a>
+        <a href="#about" data-nav="about">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/></svg>
+          About
+        </a>
+        <a href="#contact" data-nav="contact">
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 7 9-7"/></svg>
+          Contact
+        </a>
+      </nav>
+
+      <div class="sidebar-foot">© 2026 Jhon Elopre<br>elopre.dev</div>
+    </div>
+  </aside>
+
+  <!-- ══════ MAIN ══════ -->
+  <main class="main">
+
+    <!-- HOME / BENTO -->
+    <section class="panel active" id="panel-home">
+      <div class="home-top">
+        <div>
+          <h1 class="home-headline">Build it once. Run it forever.</h1>
+          <p class="home-sub">Precise, performant software — from algorithms to polished interfaces — with clean code and elegant solutions.</p>
+        </div>
+        <a href="#contact" class="btn-pill" data-nav="contact">
+          Get in touch
+          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6 8h4M8 6l2 2-2 2"/></svg>
+        </a>
+      </div>
+
+      <div class="tools-bar card">
+        <div class="tools-label">Tools I work with</div>
+        <div class="tools-marquee">
+          <div class="tools-track">
+            <div class="tools-row">
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/php/1e3a8a.svg" alt="">PHP</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/python/1e3a8a.svg" alt="">Python</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/javascript/1e3a8a" alt="">JavaScript</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/react/1e3a8a" alt="">React</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/nodedotjs/1e3a8a" alt="">Node.js</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/flutter/1e3a8a" alt="">Flutter</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/mysql/1e3a8a" alt="">MySQL</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/firebase/1e3a8a" alt="">Firebase</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/githubactions/1e3a8a" alt="">CI/CD</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/php/1e3a8a.svg" alt="">PHP</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/python/1e3a8a.svg" alt="">Python</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/javascript/1e3a8a" alt="">JavaScript</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/react/1e3a8a" alt="">React</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/nodedotjs/1e3a8a" alt="">Node.js</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/flutter/1e3a8a" alt="">Flutter</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/mysql/1e3a8a" alt="">MySQL</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/firebase/1e3a8a" alt="">Firebase</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/githubactions/1e3a8a" alt="">CI/CD</span>
+            </div>
+            <div class="tools-row" aria-hidden="true">
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/php/1e3a8a.svg" alt="">PHP</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/python/1e3a8a.svg" alt="">Python</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/javascript/1e3a8a" alt="">JavaScript</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/react/1e3a8a" alt="">React</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/nodedotjs/1e3a8a" alt="">Node.js</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/flutter/1e3a8a" alt="">Flutter</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/mysql/1e3a8a" alt="">MySQL</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/firebase/1e3a8a" alt="">Firebase</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/githubactions/1e3a8a" alt="">CI/CD</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/php/1e3a8a.svg" alt="">PHP</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/python/1e3a8a.svg" alt="">Python</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/javascript/1e3a8a" alt="">JavaScript</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/react/1e3a8a" alt="">React</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/nodedotjs/1e3a8a" alt="">Node.js</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/flutter/1e3a8a" alt="">Flutter</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/mysql/1e3a8a" alt="">MySQL</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/firebase/1e3a8a" alt="">Firebase</span>
+              <span class="tool-chip"><img src="https://cdn.simpleicons.org/githubactions/1e3a8a" alt="">CI/CD</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bento">
+        <a class="card bento-card bento-projects" href="#projects" data-nav="projects">
+          <div class="bento-head">
+            <div class="bento-icon"><svg viewBox="0 0 24 24"><path d="M4 8h16v11a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8z"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></div>
+            <div>
+              <div class="bento-title">Projects</div>
+              <div class="bento-desc">Selected web, mobile &amp; algorithm work</div>
+            </div>
+          </div>
+          <div class="bento-preview">
+            <div class="bento-carousel" id="projectsCarousel">
+              <div class="bento-carousel-track">
+                <div class="slide">
+                  <img src="assets/images/fluppy.png" alt="Fluppybrid">
+                  <span class="slide-label">Fluppybrid</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/find.png" alt="Find the Five Stars">
+                  <span class="slide-label">Find the Five Stars</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/eagle.png" alt="Eagle's Path">
+                  <span class="slide-label">Eagle's Path</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/food.png" alt="Food Hub">
+                  <span class="slide-label">Food Hub</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/student.png" alt="ACTS Student Portal">
+                  <span class="slide-label">ACTS Student</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/parents.png" alt="ACTS Parent Portal">
+                  <span class="slide-label">ACTS Parent</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/employee.png" alt="ACTS Employee Portal">
+                  <span class="slide-label">ACTS Employee</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/baranggay.png" alt="Barangay Management System">
+                  <span class="slide-label">Barangay System</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/traffic.png" alt="Traffic Routing">
+                  <span class="slide-label">Traffic Routing</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/alumni.png" alt="Alumni Tracking">
+                  <span class="slide-label">Alumni Tracking</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/cloud.png" alt="AI Budget DSS">
+                  <span class="slide-label">AI Budget DSS</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/lstm.png" alt="LSTM Career Recommendation">
+                  <span class="slide-label">Career LSTM</span>
+                </div>
+                <div class="slide">
+                  <img src="assets/images/supply.png" alt="SupplySyncApp">
+                  <span class="slide-label">SupplySync</span>
+                </div>
+              </div>
+              <button type="button" class="bento-carousel-nav prev" aria-label="Previous" data-carousel-prev>
+                <svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg>
+              </button>
+              <button type="button" class="bento-carousel-nav next" aria-label="Next" data-carousel-next>
+                <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+              </button>
+              <div class="bento-carousel-dots" id="projectsCarouselDots"></div>
+            </div>
+          </div>
+        </a>
+
+        <a class="card bento-card bento-about" href="#about" data-nav="about">
+          <div class="bento-head">
+            <div class="bento-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 19c1.5-3.5 4-5 7-5s5.5 1.5 7 5"/></svg></div>
+            <div>
+              <div class="bento-title">About</div>
+              <div class="bento-desc">Developer · Private school in Taguig</div>
+            </div>
+          </div>
+          <div class="about-illus">
+            <img src="assets/images/logonobg.svg" alt="elopre.dev">
+          </div>
+        </a>
+
+        <a class="card bento-card bento-stack" href="#stack" data-nav="stack">
+          <div class="bento-head">
+            <div class="bento-icon"><svg viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 16l9 5 9-5"/></svg></div>
+            <div>
+              <div class="bento-title">Tech Stack</div>
+              <div class="bento-desc">Languages &amp; frameworks I ship with</div>
+            </div>
+          </div>
+          <div class="stack-pills-bento">
+            <span><img src="https://cdn.simpleicons.org/php/1e3a8a.svg" alt="">PHP</span>
+            <span><img src="https://cdn.simpleicons.org/python/1e3a8a.svg" alt="">Python</span>
+            <span><img src="https://cdn.simpleicons.org/react/1e3a8a" alt="">React</span>
+            <span><img src="https://cdn.simpleicons.org/nodedotjs/1e3a8a" alt="">Node.js</span>
+            <span><img src="https://cdn.simpleicons.org/flutter/1e3a8a" alt="">Flutter</span>
+            <span><img src="https://cdn.simpleicons.org/mysql/1e3a8a" alt="">MySQL</span>
+            <span><img src="https://cdn.simpleicons.org/firebase/1e3a8a" alt="">Firebase</span>
+            <span><img src="https://cdn.simpleicons.org/githubactions/1e3a8a" alt="">CI/CD</span>
+          </div>
+        </a>
+
+        <a class="card bento-card bento-creds" href="#about" data-nav="about">
+          <div class="bento-head">
+            <div class="bento-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v5c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-3z"/></svg></div>
+            <div>
+              <div class="bento-title">Credentials</div>
+              <div class="bento-desc">Experience &amp; competition wins</div>
+            </div>
+          </div>
+          <div class="cred-wrap">
+            <div class="cred-badge">
+              <strong>Full-Stack<br>Developer</strong>
+              <span>3+ yrs · 13 projects</span>
+            </div>
+          </div>
+        </a>
+
+        <a class="card bento-card bento-services" href="#services" data-nav="services">
+          <div class="bento-head">
+            <div class="bento-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+            <div>
+              <div class="bento-title">Services</div>
+              <div class="bento-desc">What I can build for you</div>
+            </div>
+          </div>
+          <div class="svc-list">
+            <div class="svc-row">
+              <span class="svc-num">01</span>
+              <span class="svc-icon-sm" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></span>
+              Web Development
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">02</span>
+              <span class="svc-icon-sm" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg></span>
+              Mobile Development
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">03</span>
+              <span class="svc-icon-sm" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></span>
+              Desktop Development
+            </div>
+            <div class="svc-row">
+              <span class="svc-num">04</span>
+              <span class="svc-icon-sm" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M8 7l8 0M7 8l4 8M17 8l-4 8"/></svg></span>
+              Algorithm Design
+            </div>
+          </div>
+        </a>
+
+        <a class="card bento-card bento-highlights" href="#projects" data-nav="projects">
+          <div class="bento-head">
+            <div class="bento-icon"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+            <div>
+              <div class="bento-title">Highlights</div>
+              <div class="bento-desc">Recent focus areas</div>
+            </div>
+          </div>
+          <div class="hl-list">
+            <div class="hl-item">
+              <div class="hl-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>
+              </div>
+              <div><strong>ACTS Student Portal</strong><span>Live campus portal for students</span></div>
+            </div>
+            <div class="hl-item">
+              <div class="hl-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c1.2-3.2 3.5-4.8 6-4.8S13.8 15.8 15 19"/><path d="M14 14.5c1.8-.2 3.5.6 4.8 2.5"/></svg>
+              </div>
+              <div><strong>ACTS Parent Portal</strong><span>Parent access to school records</span></div>
+            </div>
+            <div class="hl-item">
+              <div class="hl-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
+              </div>
+              <div><strong>ACTS Employee Portal</strong><span>Staff tools &amp; workflows</span></div>
+            </div>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="panel" id="panel-projects">
+      <div class="panel-head">
+        <div>
+          <h2>Projects</h2>
+          <p>ACTS Colleges portals, freelance systems, thesis AI, games, and production apps.</p>
+        </div>
+        <div class="projects-filter">
+          <button class="filter-btn active" onclick="filterProjects('all',this)">All</button>
+          <button class="filter-btn" onclick="filterProjects('web',this)">Web</button>
+          <button class="filter-btn" onclick="filterProjects('mobile',this)">Mobile</button>
+          <button class="filter-btn" onclick="filterProjects('game',this)">Game</button>
+          <button class="filter-btn" onclick="filterProjects('algorithm',this)">Algorithm</button>
+          <button class="filter-btn" onclick="filterProjects('thesis',this)">Thesis</button>
+        </div>
+      </div>
+      <div class="projects-grid" id="projectsGrid">
+
+        <div class="project-card reveal" data-cat="game" data-title="Fluppybrid">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/fluppy.png" alt="Fluppybrid"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Personal · Game</div>
+            <div class="project-meta"><span class="project-cat">Game</span><span class="project-year">Dart</span></div>
+            <div class="project-name">Fluppybrid</div>
+            <p class="project-desc">A Flappy Bird–style 2D side-scrolling mobile game built with Dart (Flutter). Tap to flap, dodge obstacles, chase high scores, and restart instantly — simple controls with endless challenge.</p>
+            <div class="project-tags"><span class="project-tag">Dart</span><span class="project-tag">Flutter</span><span class="project-tag">Mobile Game</span><span class="project-tag">2D</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="game" data-title="Find the Five Stars">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/find.png" alt="Find the Five Stars"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Personal · Game</div>
+            <div class="project-meta"><span class="project-cat">Game</span><span class="project-year">Node.js</span></div>
+            <div class="project-name">Find the Five Stars</div>
+            <p class="project-desc">A 2D platform puzzle game built with Node.js — collect all five stars, dodge spikes and enemies, solve level puzzles, and reach the goal. Features lives, keys, hints, and rising difficulty across stages.</p>
+            <div class="project-tags"><span class="project-tag">Node.js</span><span class="project-tag">JavaScript</span><span class="project-tag">2D Game</span><span class="project-tag">Puzzle</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="game" data-title="Eagle's Path">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/eagle.png" alt="Eagle's Path"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Personal · Game</div>
+            <div class="project-meta"><span class="project-cat">Game</span><span class="project-year">Python</span></div>
+            <div class="project-name">Eagle's Path</div>
+            <p class="project-desc">A Flappy Bird–inspired pixel-art game built with Python (Pygame). Press Space to flap, dodge wooden log obstacles, chase your best score, and restart anytime for endless flights.</p>
+            <div class="project-tags"><span class="project-tag">Python</span><span class="project-tag">Pygame</span><span class="project-tag">2D Game</span><span class="project-tag">Pixel Art</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="mobile" data-title="Food Hub">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/food.png" alt="Food Hub"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Personal · Mobile</div>
+            <div class="project-meta"><span class="project-cat">Mobile</span><span class="project-year">Flutter</span></div>
+            <div class="project-name">Food Hub</div>
+            <p class="project-desc">A mobile food ordering app built with Flutter and Dart — browse menus, add to cart, pay with GCash and more, track orders in real time, and manage accounts with sign-up/login. Backend support with Firebase and MySQL.</p>
+            <div class="project-tags"><span class="project-tag">Flutter</span><span class="project-tag">Dart</span><span class="project-tag">Firebase</span><span class="project-tag">MySQL</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="web" data-title="ACTS Student Portal">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/student.png" alt="ACTS Student Portal"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Production · ACTS Colleges</div>
+            <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Production</span></div>
+            <div class="project-name">ACTS Student Portal</div>
+            <p class="project-desc">Student-facing campus portal for account access, academic records, and school services — built for real phone widths so students never need Desktop mode.</p>
+            <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span><span class="project-tag">PHP</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="web" data-title="ACTS Parent Portal">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/parents.png" alt="ACTS Parent Portal"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Production · ACTS Colleges</div>
+            <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Production</span></div>
+            <div class="project-name">ACTS Parent Portal</div>
+            <p class="project-desc">Parent portal for monitoring student progress, school communications, and related records — streamlined UI for families on desktop and mobile.</p>
+            <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span><span class="project-tag">PHP</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="web" data-title="ACTS Employee Portal">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/employee.png" alt="ACTS Employee Portal"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Production · ACTS Colleges</div>
+            <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Production</span></div>
+            <div class="project-name">ACTS Employee Portal</div>
+            <p class="project-desc">Employee-facing portal for campus staff workflows, internal tools, and institutional operations across ACTS Colleges.</p>
+            <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span><span class="project-tag">PHP</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="web" data-title="Barangay Management System">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/baranggay.png" alt="Barangay Management System"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot or demo</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Freelance</div>
+            <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Freelance</span></div>
+            <div class="project-name">Barangay Management System</div>
+            <p class="project-desc">Resident profiling, record keeping, and document request tracking — plus a Barangay Clearance generator for create, generate, and print workflows that cut manual paperwork.</p>
+            <div class="project-tags"><span class="project-tag">PHP</span><span class="project-tag">JavaScript</span><span class="project-tag">MySQL</span><span class="project-tag">Documents</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="algorithm" data-title="Traffic Routing (GA + Big Data)">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/traffic.png" alt="Traffic Routing"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot or demo</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Freelance</div>
+            <div class="project-meta"><span class="project-cat">Algorithm</span><span class="project-year">Freelance</span></div>
+            <div class="project-name">Optimizing Traffic Routing</div>
+            <p class="project-desc">Intelligent routing with Genetic Algorithms and Big Data Analytics — detects congestion patterns, shortens travel time, and delivers data-driven path recommendations.</p>
+            <div class="project-tags"><span class="project-tag">Genetic Algorithms</span><span class="project-tag">Big Data</span><span class="project-tag">Python</span><span class="project-tag">Analytics</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="web" data-title="Alumni Tracking System">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/alumni.png" alt="Alumni Tracking System"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Freelance / Internship</div>
+            <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">2025</span></div>
+            <div class="project-name">Alumni Tracking System</div>
+            <p class="project-desc">Centralized alumni profiling, batch management, employment status, and contact updates — with announcements, verification, events, and institutional reporting support.</p>
+            <div class="project-tags"><span class="project-tag">PHP</span><span class="project-tag">MySQL</span><span class="project-tag">JavaScript</span><span class="project-tag">Reporting</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="web" data-title="AI Budget Planning DSS">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/cloud.png" alt="AI Budget Planning DSS"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Freelance</div>
+            <div class="project-meta"><span class="project-cat">Web · AI</span><span class="project-year">Freelance</span></div>
+            <div class="project-name">AI Budget Planning DSS</div>
+            <p class="project-desc">Cloud-based decision support with predictive analytics for small-business budget planning — forecasts expenses and income, surfaces insights, and automates data-driven budgeting.</p>
+            <div class="project-tags"><span class="project-tag">Predictive Analytics</span><span class="project-tag">Cloud</span><span class="project-tag">AI</span><span class="project-tag">Python</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="thesis" data-title="LSTM NLP Career Recommendation">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/lstm.png" alt="LSTM NLP Career Recommendation"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Thesis</div>
+            <div class="project-meta"><span class="project-cat">Thesis · AI</span><span class="project-year">Thesis</span></div>
+            <div class="project-name">LSTM NLP Career Recommendation</div>
+            <p class="project-desc">AI career guidance using LSTM, NLP, OCR (Tesseract), and GloVe embeddings — matches student skills to career paths and personalized roadmaps.</p>
+            <div class="project-tags"><span class="project-tag">LSTM</span><span class="project-tag">NLP</span><span class="project-tag">OCR</span><span class="project-tag">Python</span></div>
+          </div>
+        </div>
+
+        <div class="project-card reveal" data-cat="mobile" data-title="SupplySyncApp">
+          <div class="project-img">
+            <img class="project-cover" src="assets/images/supply.png" alt="SupplySyncApp"
+              onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
+              onerror="this.style.display='none';">
+            <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
+          </div>
+          <div class="project-body">
+            <div class="project-type">Thesis / Mobile</div>
+            <div class="project-meta"><span class="project-cat">Mobile</span><span class="project-year">Thesis</span></div>
+            <div class="project-name">SupplySyncApp</div>
+            <p class="project-desc">Flutter supply &amp; reservation app with PHP API — request workflows, admin/staff approvals, low-stock monitoring, and facility booking review.</p>
+            <div class="project-tags"><span class="project-tag">Flutter</span><span class="project-tag">PHP</span><span class="project-tag">API</span><span class="project-tag">Inventory</span></div>
+          </div>
+        </div>
+
+      </div>
+
+      <div id="resume-banner">
+        <div class="rb-text">
+          <div class="rb-tag">Career Documents</div>
+          <div class="rb-title">View my full <em>experience.</em></div>
+          <div class="rb-sub">Download my resume for a complete overview of skills, work history, and education.</div>
+        </div>
+        <div class="rb-actions">
+          <a href="./Junior%20Programmer-Elopre%2C%20Jhon.pdf" download="Junior Programmer-Elopre, Jhon.pdf" class="btn-download">
+            <svg viewBox="0 0 16 16"><path d="M8 2v9M4 8l4 4 4-4"/><line x1="2" y1="14" x2="14" y2="14"/></svg>
+            Download Resume
+          </a>
+          <a href="#contact" class="btn-view-work" data-nav="contact">Get in Touch →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES -->
+    <section class="panel" id="panel-services">
+      <div class="panel-head">
+        <div>
+          <h2>Services</h2>
+          <p>End-to-end product work — from idea to shipped software.</p>
+        </div>
+      </div>
+      <div class="card section-card">
+        <div class="services-grid">
+          <div class="service-item reveal">
+            <div class="service-num">01</div>
+            <svg class="service-icon" viewBox="0 0 48 48"><rect x="4" y="8" width="40" height="28" rx="2"/><path d="M16 36l-4 8M32 36l4 8M12 44h24"/><polyline points="14,20 20,26 14,32"/><line x1="24" y1="32" x2="34" y2="32"/></svg>
+            <h3 class="service-name">Web Development</h3>
+            <p class="service-desc">Crafting responsive, high-performance web applications — from dynamic frontends to robust backend systems with seamless integrations.</p>
+          </div>
+          <div class="service-item reveal">
+            <div class="service-num">02</div>
+            <svg class="service-icon" viewBox="0 0 48 48"><rect x="14" y="4" width="20" height="40" rx="3"/><line x1="14" y1="12" x2="34" y2="12"/><line x1="14" y1="36" x2="34" y2="36"/><circle cx="24" cy="41" r="1.5"/></svg>
+            <h3 class="service-name">Mobile Development</h3>
+            <p class="service-desc">Building cross-platform mobile applications with native-like performance — intuitive UX, smooth animations, and deep device integration.</p>
+          </div>
+          <div class="service-item reveal">
+            <div class="service-num">03</div>
+            <svg class="service-icon" viewBox="0 0 48 48"><rect x="2" y="8" width="44" height="32" rx="2"/><circle cx="24" cy="40" r="3"/><line x1="16" y1="44" x2="32" y2="44"/><polyline points="12,22 18,28 12,34"/><line x1="22" y1="34" x2="36" y2="34"/></svg>
+            <h3 class="service-name">Desktop Development</h3>
+            <p class="service-desc">Developing powerful desktop software for Windows, macOS, and Linux — robust, efficient tools built for real-world productivity demands.</p>
+          </div>
+          <div class="service-item reveal">
+            <div class="service-num">04</div>
+            <svg class="service-icon" viewBox="0 0 48 48"><circle cx="10" cy="10" r="4"/><circle cx="38" cy="10" r="4"/><circle cx="24" cy="38" r="4"/><circle cx="10" cy="26" r="4"/><line x1="14" y1="10" x2="34" y2="10"/><line x1="10" y1="14" x2="10" y2="22"/><line x1="13" y1="28" x2="21" y2="35"/><line x1="36" y1="13" x2="27" y2="35"/></svg>
+            <h3 class="service-name">Algorithm Design</h3>
+            <p class="service-desc">Engineering efficient algorithms and data structures — optimising computational complexity, performance tuning, and solving complex logic challenges.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STACK -->
+    <section class="panel" id="panel-stack">
+      <div class="panel-head">
+        <div>
+          <h2>Tech Stack</h2>
+          <p>Technologies I use to design, build, and ship products.</p>
+        </div>
+      </div>
+      <div class="card section-card">
+        <div class="stack-categories">
+          <div class="stack-cat reveal">
+            <div class="stack-cat-name">Backend</div>
+            <div class="stack-pills">
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/php/1e3a8a.svg" alt="PHP"></div><span>PHP</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/python/1e3a8a.svg" alt="Python"></div><span>Python</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn-icons-png.flaticon.com/512/226/226777.png" alt="Java" width="24"></div><span>Java</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/cplusplus/1e3a8a.svg" alt="C++"></div><span>C++</span></div>
+            </div>
+          </div>
+          <div class="stack-cat reveal">
+            <div class="stack-cat-name">Frontend</div>
+            <div class="stack-pills">
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/html5/1e3a8a" alt="HTML5"></div><span>HTML5</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/css3.svg" alt="CSS3"></div><span>CSS3</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/javascript/1e3a8a" alt="JavaScript"></div><span>JavaScript</span></div>
+            </div>
+          </div>
+          <div class="stack-cat reveal">
+            <div class="stack-cat-name">Frameworks</div>
+            <div class="stack-pills">
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/nodedotjs/1e3a8a" alt="Node.js"></div><span>Node.js</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/react/1e3a8a" alt="React.js"></div><span>React.js</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/bootstrap/1e3a8a" alt="Bootstrap"></div><span>Bootstrap</span></div>
+            </div>
+          </div>
+          <div class="stack-cat reveal">
+            <div class="stack-cat-name">Mobile</div>
+            <div class="stack-pills">
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/flutter/1e3a8a" alt="Flutter"></div><span>Flutter</span></div>
+            </div>
+          </div>
+          <div class="stack-cat reveal">
+            <div class="stack-cat-name">Database</div>
+            <div class="stack-pills">
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/mysql/1e3a8a" alt="MySQL"></div><span>MySQL</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/firebase/1e3a8a" alt="Firebase"></div><span>Firebase</span></div>
+            </div>
+          </div>
+          <div class="stack-cat reveal">
+            <div class="stack-cat-name">Tools</div>
+            <div class="stack-pills">
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/github/1e3a8a" alt="GitHub"></div><span>GitHub</span></div>
+              <div class="pill"><div class="pill-icon"><img src="https://cdn.simpleicons.org/githubactions/1e3a8a" alt="CI/CD"></div><span>CI/CD</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section class="panel" id="panel-about">
+      <div class="panel-head">
+        <div>
+          <h2>About</h2>
+          <p>Full-Stack Web &amp; Mobile Developer — currently working at a private school in Taguig.</p>
+        </div>
+      </div>
+      <div class="about-grid">
+        <div class="about-visual-card reveal">
+          <div class="about-badge">Full-Stack Dev</div>
+          <div class="about-logo-wrap">
+            <img src="assets/images/logonobg.svg" alt="elopre.dev">
+          </div>
+          <div class="about-stats">
+            <div><strong>13</strong><span>Projects</span></div>
+            <div><strong>3+</strong><span>Years Exp.</span></div>
+          </div>
+        </div>
+        <div class="card section-card">
+          <p class="about-text">I'm Jhon Elopre — a Full-Stack Web &amp; Mobile Developer. I build and deploy responsive websites and single-page applications with HTML, CSS, JavaScript, PHP, Bootstrap, and React.js, and cross-platform mobile apps with Flutter.</p>
+          <p class="about-text">As a results-driven system builder, I've designed platforms like Alumni Tracking and Barangay Management to improve workflow efficiency, record management, and print-ready document generation. I'm also an AI enthusiast — I built an LSTM-based NLP Career Recommendation System using Python, OCR (Tesseract), and machine learning tools for data-driven decision support.</p>
+          <p class="about-text">I graduated with a Bachelor of Science in Computer Science from Pamantasan ng Lungsod ng Muntinlupa (2021–2025). I'm currently working as a Developer at a private school in Taguig, and I've freelanced as a Web &amp; Mobile Developer since January 2023 (including Intern Programmer work on Alumni Tracking and OJT Portal, Aug–Nov 2025).</p>
+          <ul class="about-list reveal">
+            <li>Full-stack web &amp; Flutter mobile delivery</li>
+            <li>Systems for alumni, barangay, and institutional workflows</li>
+            <li>AI / ML for career guidance and predictive analytics</li>
+            <li>REST APIs, MySQL, Firebase, GitHub &amp; CI/CD</li>
+          </ul>
+          <div style="margin-top:1.25rem;">
+            <a href="./Junior%20Programmer-Elopre%2C%20Jhon.pdf" download="Junior Programmer-Elopre, Jhon.pdf" class="btn-pill">
+              Download Resume
+              <svg viewBox="0 0 16 16"><path d="M8 2v9M4 8l4 4 4-4"/><line x1="2" y1="14" x2="14" y2="14"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="panel" id="panel-contact">
+      <div class="panel-head">
+        <div>
+          <h2>Let's work together.</h2>
+          <p>Have a project in mind? Reach out — I'm open to new opportunities.</p>
+        </div>
+      </div>
+      <div class="contact-grid">
+        <div class="card section-card contact-info">
+          <div class="contact-details reveal">
+            <div class="contact-detail">
+              <div class="cd-icon"><svg viewBox="0 0 20 20"><path d="M3 5h14M3 5l7 8 7-8M3 5v10h14V5"/></svg></div>
+              <div class="cd-body"><span class="cd-label">Email</span><a href="mailto:eloprepotchy@gmail.com" class="cd-value">eloprepotchy@gmail.com</a></div>
+            </div>
+            <div class="contact-detail">
+              <div class="cd-icon"><svg viewBox="0 0 20 20"><path d="M4 3h3l2 5-2.5 1.5a10 10 0 0 0 4 4L12 11l5 2v3a2 2 0 0 1-2 2A13 13 0 0 1 2 5a2 2 0 0 1 2-2z"/></svg></div>
+              <div class="cd-body"><span class="cd-label">Phone</span><a href="tel:+639369881562" class="cd-value">+63 936 988 1562</a></div>
+            </div>
+            <div class="contact-detail">
+              <div class="cd-icon"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="8"/><path d="M2 10h16M10 2a14 14 0 0 1 0 16M10 2a14 14 0 0 0 0 16"/></svg></div>
+              <div class="cd-body"><span class="cd-label">Website</span><span class="cd-value">elopre.dev</span></div>
+            </div>
+            <div class="contact-detail">
+              <div class="cd-icon"><svg viewBox="0 0 20 20"><path d="M10 2C7 2 5 4.5 5 7c0 4 5 11 5 11s5-7 5-11c0-2.5-2-5-5-5z"/><circle cx="10" cy="7" r="1.5"/></svg></div>
+              <div class="cd-body"><span class="cd-label">Location</span><span class="cd-value">NBP Reservation Magdaong Drive, Poblacion, Muntinlupa City</span></div>
+            </div>
+          </div>
+          <div class="contact-socials">
+            <a href="https://github.com/eloprejhon713?tab=repositories" target="_blank" class="social-pill">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="" class="social-icon"><span>GitHub</span>
+            </a>
+            <a href="https://www.linkedin.com/in/jhon-elopre-083778369/" target="_blank" class="social-pill">
+              <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="" class="social-icon"><span>LinkedIn</span>
+            </a>
+            <a href="https://www.facebook.com/tamesa2014" target="_blank" class="social-pill">
+              <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="" class="social-icon"><span>Facebook</span>
+            </a>
+            <a href="https://www.instagram.com/itsmepotchy/" target="_blank" class="social-pill">
+              <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="" class="social-icon"><span>Instagram</span>
+            </a>
+          </div>
+        </div>
+        <div class="card section-card contact-form-wrap reveal">
+          <div class="form-title">Send a Message</div>
+          <form id="contactForm" onsubmit="handleSubmit(event)">
+            <div class="form-row">
+              <div class="form-group"><label for="fname">First Name</label><input type="text" id="fname" placeholder="Jhon" required></div>
+              <div class="form-group"><label for="lname">Last Name</label><input type="text" id="lname" placeholder="Doe" required></div>
+            </div>
+            <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" placeholder="you@example.com" required></div>
+            <div class="form-group">
+              <label for="service">Service Interested In</label>
+              <select id="service">
+                <option value="" disabled selected>Select a service</option>
+                <option>Web Development</option>
+                <option>Mobile Development</option>
+                <option>Desktop Development</option>
+                <option>Algorithm Design</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group"><label for="message">Message</label><textarea id="message" placeholder="Tell me about your project..." required></textarea></div>
+            <button type="submit" class="form-submit">Send Message <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+          </form>
+          <div class="form-success" id="formSuccess">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke-width="1.5"><circle cx="20" cy="20" r="18"/><polyline points="12,20 17,26 28,14"/></svg>
+            Message sent! I'll get back to you soon.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="panel-footer">© 2026 Jhon Elopre — elopre.dev</div>
+  </main>
+</div>
+
+<!-- CHATBOT -->
+<button id="chat-toggle" aria-label="Open chat assistant">
+  <div class="chat-badge"></div>
+  <svg class="chat-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+  <svg class="close-icon" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round">
+    <line x1="4" y1="4" x2="18" y2="18"/>
+    <line x1="18" y1="4" x2="4" y2="18"/>
+  </svg>
+</button>
+
+<div id="chat-window" role="dialog" aria-label="Chat with Jhon's AI assistant">
+  <div class="chat-header">
+    <div class="chat-avatar">
+      <img src="assets/images/logonobg.svg" alt="Jhon" style="width:24px;height:24px;object-fit:contain;filter:brightness(10);">
+      <div class="chat-avatar-dot"></div>
+    </div>
+    <div class="chat-header-info">
+      <div class="chat-header-name">Elopre.Dev's Assistant</div>
+      <div class="chat-header-status">● Online now</div>
+    </div>
+    <div class="chat-header-tag">AI</div>
+  </div>
+  <div id="chat-messages"></div>
+  <div class="chat-suggestions" id="chat-suggestions"></div>
+  <div class="chat-input-area">
+    <textarea id="chat-input" placeholder="Ask me anything…" rows="1"></textarea>
+    <button id="chat-send" aria-label="Send">
+      <svg viewBox="0 0 16 16"><path d="M14 8L2 2l2.5 6L2 14l12-6z"/></svg>
+    </button>
+  </div>
+  <div class="chat-powered">Powered by elopre.dev</div>
+</div>
+
+<script>
+  /* ── LOADER ── */
+  const loaderEl = document.getElementById('loader');
+  const pctEl    = document.getElementById('loaderPct');
+  const statusEl = document.getElementById('loaderStatus');
+  const phases   = ['Initialising','Loading assets','Building UI','Almost ready','Complete'];
+  let pct = 0;
+  document.body.style.overflow = 'hidden';
+  const iv = setInterval(() => {
+    pct = Math.min(pct + Math.floor(Math.random() * 9) + 4, 100);
+    pctEl.textContent = pct + '%';
+    statusEl.textContent = phases[Math.min(Math.floor(pct / 25), 4)];
+    if (pct >= 100) {
+      clearInterval(iv);
+      setTimeout(() => {
+        loaderEl.classList.add('loader-done');
+        setTimeout(() => { loaderEl.style.display = 'none'; document.body.style.overflow = ''; }, 650);
+      }, 300);
+    }
+  }, 80);
+
+  /* ── SCROLL REVEAL ── */
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  /* ── PANEL NAV ── */
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  const menuBtn = document.getElementById('menuBtn');
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+  function openSidebar() {
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+  }
+  menuBtn.addEventListener('click', () => {
+    sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+
+  function showPanel(id) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    const panel = document.getElementById('panel-' + id);
+    if (!panel) return;
+    panel.classList.add('active');
+    document.querySelectorAll('#sideNav a').forEach(a => {
+      a.classList.toggle('active', a.dataset.nav === id);
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    closeSidebar();
+    panel.querySelectorAll('.reveal:not(.visible)').forEach(el => obs.observe(el));
+  }
+
+  document.querySelectorAll('[data-nav]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      const id = el.dataset.nav;
+      if (!id) return;
+      e.preventDefault();
+      showPanel(id);
+      history.replaceState(null, '', '#' + id);
+    });
+  });
+
+  const hash = (location.hash || '#home').slice(1);
+  if (['home','projects','services','stack','about','contact'].includes(hash)) {
+    showPanel(hash);
+  }
+  /* ── BENTO PROJECTS CAROUSEL ── */
+  (function initProjectsCarousel() {
+    const root = document.getElementById('projectsCarousel');
+    if (!root) return;
+    const track = root.querySelector('.bento-carousel-track');
+    const slides = Array.from(track.querySelectorAll('.slide'));
+    const dotsWrap = document.getElementById('projectsCarouselDots');
+    const prevBtn = root.querySelector('[data-carousel-prev]');
+    const nextBtn = root.querySelector('[data-carousel-next]');
+    let index = 0;
+    let timer;
+
+    slides.forEach((_, i) => {
+      const dot = document.createElement('span');
+      if (i === 0) dot.classList.add('active');
+      dotsWrap.appendChild(dot);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    function go(i) {
+      index = (i + slides.length) % slides.length;
+      track.style.transform = `translateX(-${index * 100}%)`;
+      dots.forEach((d, di) => d.classList.toggle('active', di === index));
+      // pause other videos, play current if video
+      slides.forEach((slide, si) => {
+        const v = slide.querySelector('video');
+        if (!v) return;
+        if (si === index) {
+          v.currentTime = 0;
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      });
+    }
+
+    function next() { go(index + 1); }
+    function prev() { go(index - 1); }
+
+    function start() {
+      clearInterval(timer);
+      timer = setInterval(next, 3500);
+    }
+
+    prevBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); prev(); start(); });
+    nextBtn.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); next(); start(); });
+    root.addEventListener('click', (e) => {
+      if (e.target.closest('.bento-carousel-nav')) e.preventDefault();
+    });
+    root.addEventListener('mouseenter', () => clearInterval(timer));
+    root.addEventListener('mouseleave', start);
+
+    go(0);
+    start();
+  })();
+
+  /* ── PROJECT FILTER ── */
+  function filterProjects(cat, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.project-card').forEach(card => {
+      const match = cat === 'all' || card.dataset.cat === cat;
+      card.style.transition = 'opacity .35s ease, transform .35s ease';
+      if (match) {
+        card.style.opacity = '1'; card.style.transform = '';
+        card.style.pointerEvents = ''; card.style.display = 'flex';
+      } else {
+        card.style.opacity = '0'; card.style.transform = 'scale(0.96)';
+        card.style.pointerEvents = 'none';
+        setTimeout(() => { if (card.style.opacity === '0') card.style.display = 'none'; }, 350);
+      }
+    });
+  }
+
+  /* ── CONTACT FORM ── */
+  async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const btn = form.querySelector('.form-submit');
+    const originalBtnHtml = btn.innerHTML;
+    const payload = {
+      firstName: document.getElementById('fname').value.trim(),
+      lastName:  document.getElementById('lname').value.trim(),
+      email:     document.getElementById('email').value.trim(),
+      service:   document.getElementById('service').value,
+      message:   document.getElementById('message').value.trim()
+    };
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.message || 'Failed to send message.');
+      form.style.display = 'none';
+      document.getElementById('formSuccess').style.display = 'block';
+    } catch (err) {
+      alert(err.message || 'Unable to send message right now. Please try again.');
+      btn.innerHTML = originalBtnHtml;
+      btn.disabled = false;
+    }
+  }
+
+  /* ── CHATBOT ── */
+  /* Resume Q&A — first person as Jhon; facts from Junior Programmer-Elopre, Jhon.pdf */
+  function answerFromResume(question) {
+    const t = String(question || '').toLowerCase().trim();
+    if (!t) return "I don't have that detail here. Feel free to email me at eloprepotchy@gmail.com for more information.";
+
+    const contact = "You can reach me at eloprepotchy@gmail.com or +639369881562. LinkedIn: https://www.linkedin.com/in/jhon-elopre-083778369/. I'm based at NBP Reservation Magdaong Drive, Poblacion, Muntinlupa City.";
+    const experience = "I currently work as a Developer at a private school in Taguig. I also freelance as a Web & Mobile Developer (January 2023 – Present), building responsive websites and SPAs with HTML, CSS, JavaScript, PHP, Bootstrap, and React.js, as well as Flutter mobile apps with REST API integration.\n\nI previously served as Intern Programmer (August 12 – November 17, 2025), contributing to an Alumni Tracking System and OJT Portal—implementing record workflows, improving Bootstrap UI, and helping deliver systems that manage 500+ records.";
+    const freelance = "My freelance portfolio includes:\n\n• Barangay Management System — resident profiling, records, document requests, and printable Barangay Clearance generation.\n• Traffic Routing with Genetic Algorithms & Big Data — smarter routes, reduced congestion, and data-driven recommendations.\n• Alumni Tracking System — profiling, employment tracking, announcements, and institutional reporting.\n• AI Budget Decision Support System — predictive analytics for small-business expense and income forecasting.\n\nI also built Food Hub (Flutter/Dart food ordering app with Firebase & MySQL) and games: Find the Five Stars (Node.js), Fluppybrid (Dart/Flutter), and Eagle's Path (Python/Pygame).";
+    const thesis = "My thesis projects are:\n\n• LSTM-Based NLP Career Recommendation System — personalized career suggestions using LSTM, NLP, OCR (Tesseract), and GloVe embeddings in Python.\n• SupplySyncApp — a Flutter app with a PHP API for supply requests, inventory monitoring, approvals, and facility reservations.";
+    const skills = "I work with HTML, CSS, JavaScript, React.js, and Bootstrap on the frontend; PHP, Python, Node.js, MySQL, and Firebase on the backend; Flutter for mobile; and Python with LSTM, NLP, OCR, and predictive analytics for AI/ML. I use Git, GitHub, and CI/CD for version control and delivery.";
+    const about = "I'm Jhon Elopre, a Full-Stack Web & Mobile Developer. I graduated with a BS in Computer Science from Pamantasan ng Lungsod ng Muntinlupa (2021–2025). I'm currently working as a Developer at a private school in Taguig, and I also freelance on web and mobile projects. I've built systems like Alumni Tracking and Barangay Management, plus AI work such as an LSTM-based career recommendation system.";
+
+    if (/(contact|email|phone|linkedin|hire|reach|get in touch|address)/.test(t)) return contact;
+    if (/(work experience|experience|intern|freelance developer|job|employment|ojt)/.test(t)) return experience;
+    if (/(thesis)/.test(t) || /(lstm|career recommendation|supplysync|supply sync|reservation)/.test(t)) {
+      if (/lstm|career/.test(t)) return "I developed an LSTM-Based NLP Career Recommendation System using LSTM, NLP, OCR (Tesseract), and GloVe embeddings in Python. It matches student skills to career paths and provides personalized roadmaps.";
+      if (/supply|reservation/.test(t)) return "SupplySyncApp is my Flutter mobile system with a PHP backend for supply requests, low-stock inventory monitoring, admin/staff approvals, and facility reservation booking.";
+      return thesis;
+    }
+    if (/food hub|foodhub|food order|ordering app/.test(t)) {
+      return "I built Food Hub — a Flutter/Dart mobile food ordering app. Browse menus, add to cart, pay with GCash and other options, track orders in real time, and manage accounts. It uses Firebase and MySQL on the backend.";
+    }
+    if (/eagle|eagle'?s path|python game/.test(t)) {
+      return "I built Eagle's Path — a Flappy Bird–inspired pixel-art game in Python with Pygame. Press Space to flap, dodge wooden logs, track your best score, and restart for endless flights.";
+    }
+    if (/fluppy|flappy|dart game/.test(t)) {
+      return "I built Fluppybrid — a Flappy Bird–style 2D mobile game with Dart and Flutter. Tap to flap, dodge wooden obstacles, chase high scores, and restart quickly for endless gameplay.";
+    }
+    if (/find|five stars|platform|puzzle game|nodejs game|node\.?js game/.test(t)) {
+      return "I built Find the Five Stars — a 2D platform puzzle game with Node.js. Players collect five hidden stars, dodge spikes and enemies, use keys and hints, and reach the goal across increasingly challenging levels.";
+    }
+    if (/(freelance project|freelance projects|project portfolio|projects|systems have you built)/.test(t)) return freelance;
+    if (/barangay/.test(t)) return "My Barangay Management System handles resident profiling, record keeping, and document request tracking, including a Barangay Clearance feature to create, generate, and print official documents with less manual paperwork.";
+    if (/traffic|genetic|routing|congestion/.test(t)) return "I built a traffic routing system using Genetic Algorithms and Big Data Analytics to optimize travel paths, reduce congestion, and provide data-driven routing recommendations.";
+    if (/alumni/.test(t)) return "My Alumni Tracking System centralizes alumni profiling, batch management, employment status, and contact updates, with announcements, verification, and reporting. During my internship, I helped deliver systems managing 500+ records.";
+    if (/budget|predictive|decision support|dss|small business/.test(t)) return "I built a cloud-based decision support system that uses AI predictive analytics to forecast expenses and income for small businesses, delivering real-time financial insights and automated budget planning.";
+    if (/(certification|certificate|great learning)/.test(t)) return "I hold certifications in Python Fundamentals for Beginners and Python for Data Science from Great Learning Academy.";
+    if (/(education|school|college|university|plmun|degree|graduate)/.test(t)) return "I graduated with a Bachelor of Science in Computer Science from Pamantasan ng Lungsod ng Muntinlupa (February 2021 – December 2025). I completed Senior High School (ICT Strand) at Muntinlupa National High School Main (June 2017 – March 2021). I'm currently working as a Developer at a private school in Taguig.";
+    if (/(tech stack|skills|technologies|tools|react|flutter|php|python|stack)/.test(t)) return skills;
+    if (/(achievement|award|competition|olympics|huawei|robotics)/.test(t)) return "I've competed in the Huawei 9th ICT Competition, the 13th IT Skills Olympics, and E-ROVOUTIKA: E-ROBOT V1 Robotics Competition.";
+    if (/(acts|student portal|parent portal|employee portal)/.test(t)) return "I also built live ACTS Colleges portals: Student (https://student.actscolleges.edu.ph/studentportal.html), Parent (https://parent.actscolleges.edu.ph/), and Employee (https://employee.actscolleges.edu.ph/).";
+    if (/(who is|about jhon|about you|summary|introduce)/.test(t)) return about;
+    if (/(service|offer|what do you do)/.test(t)) return about + "\n\n" + skills;
+    return "I don't have that detail here. Feel free to email me at eloprepotchy@gmail.com for more information.";
+  }
+
+  function formatBotText(text) {
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/\n/g, '<br>');
+  }
+
+  const chatToggle   = document.getElementById('chat-toggle');
+  const chatWindow   = document.getElementById('chat-window');
+  const chatMessages = document.getElementById('chat-messages');
+  const chatInput    = document.getElementById('chat-input');
+  const chatSend     = document.getElementById('chat-send');
+  const suggestions  = document.getElementById('chat-suggestions');
+
+  const ALL_SUGGESTIONS = [
+    "What's your work experience?",
+    "Tell me about your freelance projects",
+    "What are your thesis projects?",
+    "How can I contact Jhon?",
+  ];
+  let remainingSuggestions = ALL_SUGGESTIONS.slice();
+
+  let isOpen    = false;
+  let isLoading = false;
+  let chatHistory = [];
+  let greeted = false;
+
+  const USER_AVATAR_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 19.5c.8-3.2 3.2-5 6.5-5s5.7 1.8 6.5 5"/></svg>`;
+
+  function getTime() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function appendMessage(role, text) {
+    const msg = document.createElement('div');
+    msg.className = `msg ${role}`;
+    const avatarInner = role === 'bot'
+      ? `<img src="assets/images/logonobg.svg" alt="" style="width:100%;height:100%;object-fit:contain;filter:brightness(10);">`
+      : USER_AVATAR_SVG;
+    msg.innerHTML = `
+      <div class="msg-avatar" aria-hidden="true">${avatarInner}</div>
+      <div class="msg-content">
+        <div class="msg-bubble">${formatBotText(text)}</div>
+        <div class="msg-time">${getTime()}</div>
+      </div>
+    `;
+    chatMessages.appendChild(msg);
+    requestAnimationFrame(() => {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  }
+
+  function showTyping() {
+    const t = document.createElement('div');
+    t.className = 'typing-indicator';
+    t.id = 'typing-ind';
+    t.innerHTML = `
+      <div class="msg-avatar" style="background:var(--navy-light);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;overflow:hidden;padding:4px;"><img src="assets/images/logonobg.svg" alt="Jhon" style="width:100%;height:100%;object-fit:contain;filter:brightness(10);"></div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    `;
+    chatMessages.appendChild(t);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  }
+
+  function hideTyping() {
+    const t = document.getElementById('typing-ind');
+    if (t) t.remove();
+  }
+
+  function renderSuggestions() {
+    suggestions.innerHTML = '';
+    if (!remainingSuggestions.length) {
+      suggestions.style.display = 'none';
+      return;
+    }
+    suggestions.style.display = 'flex';
+    remainingSuggestions.forEach((text) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'suggestion-chip';
+      btn.textContent = text;
+      btn.addEventListener('click', () => sendSuggestion(text));
+      suggestions.appendChild(btn);
+    });
+  }
+
+  function consumeSuggestion(text) {
+    const normalized = text.trim().toLowerCase();
+    remainingSuggestions = remainingSuggestions.filter(
+      (s) => s.trim().toLowerCase() !== normalized
+    );
+  }
+
+  function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function sendMessage(userText) {
+    if (!userText.trim() || isLoading) return;
+    consumeSuggestion(userText);
+    suggestions.style.display = 'none';
+    isLoading = true;
+    chatSend.disabled = true;
+
+    appendMessage('user', userText);
+    chatHistory.push({ role: 'user', content: userText });
+
+    showTyping();
+
+    const typingStarted = Date.now();
+    let reply = '';
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: chatHistory, message: userText })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        reply = (data && data.reply) ? data.reply : '';
+      }
+    } catch (err) {
+      reply = '';
+    }
+
+    if (!reply) reply = answerFromResume(userText);
+
+    // Brief typing pause only (bubble already visible)
+    const typingMin = 600;
+    const elapsed = Date.now() - typingStarted;
+    if (elapsed < typingMin) await wait(typingMin - elapsed);
+
+    hideTyping();
+    chatHistory.push({ role: 'assistant', content: reply });
+    appendMessage('bot', reply);
+
+    isLoading = false;
+    chatSend.disabled = false;
+    renderSuggestions();
+    chatInput.focus();
+  }
+
+  function sendSuggestion(text) {
+    if (isLoading) return;
+    sendMessage(text);
+  }
+
+  renderSuggestions();
+
+  chatToggle.addEventListener('click', () => {
+    isOpen = !isOpen;
+    chatToggle.classList.toggle('open', isOpen);
+    chatWindow.classList.toggle('open', isOpen);
+
+    if (isOpen && !greeted) {
+      greeted = true;
+      setTimeout(() => {
+        appendMessage('bot', "Hi! 👋 I'm Jhon. Ask me about my work experience, freelance & thesis projects, education, certifications, or how to get in touch.");
+      }, 350);
+    }
+  });
+
+  chatSend.addEventListener('click', () => {
+    const text = chatInput.value.trim();
+    if (text) { chatInput.value = ''; autoResize(); sendMessage(text); }
+  });
+
+  chatInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      const text = chatInput.value.trim();
+      if (text) { chatInput.value = ''; autoResize(); sendMessage(text); }
+    }
+  });
+
+  function autoResize() {
+    chatInput.style.height = 'auto';
+    chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+  }
+  chatInput.addEventListener('input', autoResize);
+</script>
+</body>
+</html>
