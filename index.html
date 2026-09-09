@@ -294,7 +294,7 @@
      MAIN
   ══════════════════════════════ */
   .main {
-    padding: 1.5rem 1.75rem 2rem 0.75rem;
+    padding: 0 1.75rem 2rem 0.75rem;
     min-width: 0;
   }
   .panel { display: none; animation: panelIn .35s ease; }
@@ -302,6 +302,47 @@
   @keyframes panelIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: none; }
+  }
+
+  /* Sticky main header */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 -0.35rem 1.15rem;
+    padding: 1rem 0.5rem 0.85rem;
+    background: rgba(238, 241, 248, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  }
+  .site-header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--navy);
+    font-weight: 800;
+    font-size: 1.05rem;
+    letter-spacing: -0.03em;
+  }
+  .site-header-brand img {
+    width: 32px; height: 32px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--white);
+  }
+  .site-header-brand em {
+    font-style: normal;
+    color: var(--blue);
+  }
+  .site-header .btn-pill {
+    padding: 0.65rem 1.15rem;
+    font-size: 0.85rem;
   }
 
   .card {
@@ -314,7 +355,7 @@
   /* Home hero row */
   .home-top {
     display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 1.5rem; margin-bottom: 1.25rem; padding: 0.35rem 0.25rem 0;
+    gap: 1.5rem; margin-bottom: 1.25rem; padding: 0.15rem 0.25rem 0;
   }
   .home-headline {
     font-size: clamp(1.85rem, 3.2vw, 2.65rem);
@@ -1084,7 +1125,15 @@
       transform: translateX(0);
       pointer-events: auto;
     }
-    .main { padding: 4.75rem 1rem 2rem; }
+    .main { padding: 0 1rem 2rem; }
+    .site-header {
+      top: 60px;
+      margin: 60px -0.25rem 1rem;
+      padding: 0.65rem 0.25rem 0.7rem;
+      background: rgba(238, 241, 248, 0.94);
+    }
+    .site-header-brand { display: none; }
+    .site-header .btn-pill { margin-left: auto; }
     .home-top { flex-direction: column; align-items: flex-start; }
     .bento { grid-template-columns: 1fr; }
     .services-grid, .about-grid, .contact-grid, .projects-grid { grid-template-columns: 1fr; }
@@ -1191,6 +1240,17 @@
   <!-- ══════ MAIN ══════ -->
   <main class="main">
 
+    <header class="site-header" id="siteHeader">
+      <a href="#home" class="site-header-brand" data-nav="home">
+        <img src="assets/images/logo.svg" alt="">
+        <span>elopre<em>.dev</em></span>
+      </a>
+      <a href="#contact" class="btn-pill" data-nav="contact">
+        Get in touch
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6 8h4M8 6l2 2-2 2"/></svg>
+      </a>
+    </header>
+
     <!-- HOME / BENTO -->
     <section class="panel active" id="panel-home">
       <div class="home-top">
@@ -1198,10 +1258,6 @@
           <h1 class="home-headline">Build it once. Run it forever.</h1>
           <p class="home-sub">Precise, performant software — from algorithms to polished interfaces — with clean code and elegant solutions.</p>
         </div>
-        <a href="#contact" class="btn-pill" data-nav="contact">
-          Get in touch
-          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6 8h4M8 6l2 2-2 2"/></svg>
-        </a>
       </div>
 
       <div class="tools-bar card">
