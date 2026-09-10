@@ -191,15 +191,24 @@ app.post("/api/contact", async (req, res) => {
                 <tr>
                   <td style="padding:26px 26px 24px;background:linear-gradient(180deg,#ffffff 0%,#f4f6fb 100%);">
 
-                    <p style="margin:0 0 6px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px;line-height:1.7;color:#64748b;">
-                      <span style="color:#2563eb;">guest@elopre.dev</span>
-                      <span style="color:#64748b;"> ~/inbox</span>
-                      <span style="color:#cbd5e1;"> %</span>
-                      <span style="color:#0f172a;"> cat new-inquiry.log</span>
-                    </p>
-                    <p style="margin:14px 0 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;">
-                      <span style="color:#cbd5e1;">// </span>Someone reached out through your portfolio contact form
-                    </p>
+                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:20px;">
+                      <tr>
+                        <td style="vertical-align:middle;padding-right:16px;">
+                          <p style="margin:0 0 6px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px;line-height:1.7;color:#64748b;">
+                            <span style="color:#2563eb;">guest@elopre.dev</span>
+                            <span style="color:#64748b;"> ~/inbox</span>
+                            <span style="color:#cbd5e1;"> %</span>
+                            <span style="color:#0f172a;"> cat new-inquiry.log</span>
+                          </p>
+                          <p style="margin:8px 0 0;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;">
+                            <span style="color:#cbd5e1;">// </span>Someone reached out through your portfolio contact form
+                          </p>
+                        </td>
+                        <td align="right" width="120" style="vertical-align:middle;width:120px;">
+                          <img src="${logoUrl}" alt="elopre.dev" width="110" height="auto" style="display:block;margin-left:auto;height:40px;width:auto;border:0;outline:none;">
+                        </td>
+                      </tr>
+                    </table>
 
                     <!-- Sender -->
                     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border:1px solid #e2e8f0;border-radius:10px;background-color:#f1f5f9;margin-bottom:16px;">
@@ -277,11 +286,10 @@ app.post("/api/contact", async (req, res) => {
               <!-- Status bar -->
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f1f5f9;border-top:1px solid #e2e8f0;">
                 <tr>
-                  <td style="padding:10px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;vertical-align:middle;">
-                    <img src="${logoUrl}" alt="elopre.dev" width="88" height="auto" style="display:inline-block;height:22px;width:auto;vertical-align:middle;border:0;outline:none;margin-right:10px;">
-                    <span style="vertical-align:middle;">contact form</span>
+                  <td style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;">
+                    elopre.dev contact form
                   </td>
-                  <td align="right" style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;vertical-align:middle;">
+                  <td align="right" style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;">
                     UTF-8
                   </td>
                 </tr>
