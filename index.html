@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Jhon Elopre — elopre.dev</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="assets/images/logo.svg">
+<link rel="icon" type="image/png" href="assets/images/icon.png">
 <style>
   :root {
     --white:       #ffffff;
@@ -88,26 +88,35 @@
 
   .logo-spinner-wrap {
     position: relative;
-    width: 100px; height: 100px;
+    width: 180px; height: 180px;
     display: flex; align-items: center; justify-content: center;
     margin-bottom: 28px;
   }
   .loader-logo-box {
-    width: 72px; height: 72px;
-    border-radius: 16px;
-    border: 1px solid var(--border-dark);
-    background: var(--off-white); overflow: hidden;
+    width: 148px; height: 148px;
+    border-radius: 22px;
+    border: none;
+    background: transparent;
+    overflow: hidden;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 2px 12px rgba(30,58,138,0.08);
+    box-shadow: none;
     position: relative; z-index: 1;
+    padding: 6px;
+    box-sizing: border-box;
   }
-  .loader-logo-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .loader-logo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.2, 1.45);
+    display: block;
+  }
 
   .loader-spinner {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotateZ(45deg);
     perspective: 1000px; border-radius: 50%;
-    width: 100px; height: 100px; color: var(--navy-light); z-index: 3;
+    width: 180px; height: 180px; color: var(--navy-light); z-index: 3;
   }
   .loader-spinner:before, .loader-spinner:after {
     content: ''; display: block; position: absolute;
@@ -190,7 +199,6 @@
     display: flex; align-items: center; gap: 0.55rem;
     font-weight: 700; font-size: 0.95rem; color: var(--navy); text-decoration: none;
   }
-  .mobile-bar-brand img { width: 28px; height: 28px; border-radius: 8px; }
   .menu-btn {
     width: 42px; height: 42px; border-radius: 12px;
     border: 1px solid var(--border); background: var(--white);
@@ -336,8 +344,15 @@
   .site-header-brand img {
     width: 32px; height: 32px;
     border-radius: 9px;
-    border: 1px solid var(--border);
-    background: var(--white);
+    border: none;
+    background: transparent;
+    object-fit: contain;
+  }
+  .mobile-bar-brand img {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: transparent;
+    object-fit: contain;
   }
   .site-header-brand em {
     font-style: normal;
@@ -1207,9 +1222,12 @@
   }
   .chat-avatar {
     width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--navy-light), var(--blue));
+    background: transparent;
     border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; position: relative;
+    flex-shrink: 0; position: relative; overflow: hidden; padding: 0;
+  }
+  .chat-avatar img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
   }
   .chat-avatar-dot {
     position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px;
@@ -1227,9 +1245,24 @@
   #chat-messages {
     flex: 1; overflow-y: auto; padding: 1.25rem;
     display: flex; flex-direction: column; gap: 1rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  #chat-messages::-webkit-scrollbar { width: 4px; }
-  #chat-messages::-webkit-scrollbar-thumb { background: var(--border-dark); border-radius: 2px; }
+  #chat-messages::-webkit-scrollbar { display: none; width: 0; height: 0; }
+  .chat-body {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .chat-body #chat-messages {
+    flex: 1;
+    min-height: 0;
+  }
+  .chat-body.has-suggestions #chat-messages {
+    padding-bottom: 7.5rem;
+  }
 
   .msg {
     display: flex;
@@ -1254,9 +1287,9 @@
     display: flex; align-items: center; justify-content: center;
   }
   .msg.bot .msg-avatar {
-    background: var(--navy-light); color: white; padding: 5px; overflow: hidden; border-radius: 10px;
+    background: transparent; color: white; padding: 0; overflow: hidden; border-radius: 10px;
   }
-  .msg.bot .msg-avatar img { width: 100%; height: 100%; object-fit: contain; filter: brightness(10); display: block; }
+  .msg.bot .msg-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .msg.user .msg-avatar {
     background: var(--navy);
     color: #fff;
@@ -1323,11 +1356,28 @@
     40% { transform: scale(1); opacity: 1; }
   }
 
-  .chat-suggestions { padding: 0 1.25rem 1rem; display: flex; flex-wrap: wrap; gap: 0.45rem; flex-shrink: 0; }
+  .chat-suggestions {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 0.55rem 1.25rem 0.9rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    background: transparent;
+    pointer-events: none;
+  }
   .suggestion-chip {
     font-size: 0.7rem; font-weight: 500; color: var(--navy-light);
-    border: 1px solid var(--blue-pale); background: var(--blue-pale);
-    padding: 0.35rem 0.7rem; border-radius: 999px; cursor: pointer; transition: all 0.2s;
+    border: 1px solid rgba(30, 58, 138, 0.35);
+    background: transparent;
+    padding: 0.35rem 0.7rem; border-radius: 999px; cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    pointer-events: auto;
+    -webkit-appearance: none;
+    appearance: none;
   }
   .suggestion-chip:hover { background: var(--navy-light); color: white; border-color: var(--navy-light); }
 
@@ -1340,7 +1390,11 @@
     background: var(--off-white); color: var(--text); font-size: 0.875rem;
     outline: none; resize: none; min-height: 40px; max-height: 100px;
     border-radius: 12px; line-height: 1.5;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+  #chat-input::-webkit-scrollbar { display: none; width: 0; height: 0; }
   #chat-input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.1); background: white; }
   #chat-send {
     width: 40px; height: 40px; background: var(--navy-light); border: none; border-radius: 12px;
@@ -1454,7 +1508,7 @@
     <div class="logo-spinner-wrap">
       <div class="loader-spinner"></div>
       <div class="loader-logo-box">
-        <img src="assets/images/logonobg.svg" alt="elopre.dev logo">
+        <img src="assets/images/logonobg.png" alt="elopre.dev logo">
       </div>
     </div>
     <div class="loader-brand">elopre<em>.dev</em></div>
@@ -1471,7 +1525,7 @@
 
 <div class="mobile-bar">
   <a href="#" class="mobile-bar-brand" data-nav="home">
-    <img src="assets/images/logo.svg" alt="">
+    <img src="assets/images/logonobg.png" alt="">
     elopre.dev
   </a>
   <button class="menu-btn" id="menuBtn" aria-label="Open menu">
@@ -1545,7 +1599,7 @@
 
     <header class="site-header" id="siteHeader">
       <a href="#home" class="site-header-brand" data-nav="home">
-        <img src="assets/images/logo.svg" alt="">
+        <img src="assets/images/logonobg.png" alt="">
         <span>elopre<em>.dev</em></span>
       </a>
       <a href="#contact" class="btn-pill" data-nav="contact">
@@ -1696,7 +1750,7 @@
             </div>
           </div>
           <div class="about-illus">
-            <img src="assets/images/logonobg.svg" alt="elopre.dev">
+            <img src="assets/images/logonobg.png" alt="elopre.dev">
           </div>
         </a>
 
@@ -2156,7 +2210,7 @@
         <div class="about-visual-card reveal">
           <div class="about-badge">Full-Stack Dev</div>
           <div class="about-logo-wrap">
-            <img src="assets/images/logonobg.svg" alt="elopre.dev">
+            <img src="assets/images/logo.png" alt="elopre.dev">
           </div>
           <div class="about-stats">
             <div><strong>13</strong><span>Projects</span></div>
@@ -2304,7 +2358,7 @@
 <div id="chat-window" role="dialog" aria-label="Chat with Jhon's AI assistant">
   <div class="chat-header">
     <div class="chat-avatar">
-      <img src="assets/images/logonobg.svg" alt="Jhon" style="width:24px;height:24px;object-fit:contain;filter:brightness(10);">
+      <img src="assets/images/icon.png" alt="Jhon" style="width:40px;height:40px;object-fit:cover;">
       <div class="chat-avatar-dot"></div>
     </div>
     <div class="chat-header-info">
@@ -2313,8 +2367,10 @@
     </div>
     <div class="chat-header-tag">AI</div>
   </div>
-  <div id="chat-messages"></div>
-  <div class="chat-suggestions" id="chat-suggestions"></div>
+  <div class="chat-body" id="chat-body">
+    <div id="chat-messages"></div>
+    <div class="chat-suggestions" id="chat-suggestions"></div>
+  </div>
   <div class="chat-input-area">
     <textarea id="chat-input" placeholder="Ask me anything…" rows="1"></textarea>
     <button id="chat-send" aria-label="Send">
@@ -2686,6 +2742,7 @@
 
   const chatToggle   = document.getElementById('chat-toggle');
   const chatWindow   = document.getElementById('chat-window');
+  const chatBody     = document.getElementById('chat-body');
   const chatMessages = document.getElementById('chat-messages');
   const chatInput    = document.getElementById('chat-input');
   const chatSend     = document.getElementById('chat-send');
@@ -2716,7 +2773,7 @@
     const msg = document.createElement('div');
     msg.className = `msg ${role}`;
     const avatarInner = role === 'bot'
-      ? `<img src="assets/images/logonobg.svg" alt="" style="width:100%;height:100%;object-fit:contain;filter:brightness(10);">`
+      ? `<img src="assets/images/icon.png" alt="" style="width:100%;height:100%;object-fit:cover;">`
       : USER_AVATAR_SVG;
     msg.innerHTML = `
       <div class="msg-avatar" aria-hidden="true">${avatarInner}</div>
@@ -2736,7 +2793,7 @@
     t.className = 'typing-indicator';
     t.id = 'typing-ind';
     t.innerHTML = `
-      <div class="msg-avatar" style="background:var(--navy-light);width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;overflow:hidden;padding:4px;"><img src="assets/images/logonobg.svg" alt="Jhon" style="width:100%;height:100%;object-fit:contain;filter:brightness(10);"></div>
+      <div class="msg-avatar" style="width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;overflow:hidden;background:transparent;"><img src="assets/images/icon.png" alt="Jhon" style="width:100%;height:100%;object-fit:cover;"></div>
       <div class="typing-dots"><span></span><span></span><span></span></div>
     `;
     chatMessages.appendChild(t);
@@ -2752,9 +2809,11 @@
     suggestions.innerHTML = '';
     if (!remainingSuggestions.length) {
       suggestions.style.display = 'none';
+      if (chatBody) chatBody.classList.remove('has-suggestions');
       return;
     }
     suggestions.style.display = 'flex';
+    if (chatBody) chatBody.classList.add('has-suggestions');
     remainingSuggestions.forEach((text) => {
       const btn = document.createElement('button');
       btn.type = 'button';
@@ -2780,6 +2839,7 @@
     if (!userText.trim() || isLoading) return;
     consumeSuggestion(userText);
     suggestions.style.display = 'none';
+    if (chatBody) chatBody.classList.remove('has-suggestions');
     isLoading = true;
     chatSend.disabled = true;
 

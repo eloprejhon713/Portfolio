@@ -108,7 +108,17 @@ app.post("/api/contact", async (req, res) => {
 
   const { firstName, lastName, email, service, message } = validated.data;
   const fullName = `${firstName} ${lastName}`.trim();
+  const initials = `${(firstName[0] || "").toUpperCase()}${(lastName[0] || "").toUpperCase()}` || "?";
+  const replyName = (firstName || fullName.split(/\s+/)[0] || "guest").toLowerCase();
+  const serviceSlug = String(service || "inquiry")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "inquiry";
   const safeMessageHtml = escapeHtml(message).replace(/\n/g, "<br>");
+  const replySubject = encodeURIComponent("Re: Your inquiry on elopre.dev");
+  const year = new Date().getFullYear();
+  const logoUrl = "https://eloprejhon713.github.io/Portfolio/assets/images/logonobg.png";
 
   const mailOptions = {
   from: getFromAddress(),
@@ -122,111 +132,166 @@ app.post("/api/contact", async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Client Inquiry</title>
+  <title>New inquiry — elopre.dev</title>
 </head>
-<body style="margin:0;padding:0;background-color:#f1f5f9;font-family:'Segoe UI',Arial,Helvetica,sans-serif;">
+<body style="margin:0;padding:0;background-color:#eef1f8;font-family:Inter,Segoe UI,Arial,Helvetica,sans-serif;color:#0f172a;-webkit-font-smoothing:antialiased;">
 
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f1f5f9;padding:40px 16px;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#eef1f8;padding:40px 16px;">
     <tr>
       <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <table width="640" cellpadding="0" cellspacing="0" role="presentation" style="max-width:640px;width:100%;">
 
-          <!-- ── HEADER ── -->
+          <!-- Top bar -->
           <tr>
-            <td style="background-color:#0d1b3e;padding:36px 40px 32px;text-align:center;">
-              <!-- Logo wordmark -->
-              <div style="font-family:Georgia,'Times New Roman',serif;font-size:22px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;margin-bottom:6px;">
-                elopre<span style="color:#3b82f6;">.dev</span>
-              </div>
-              <div style="width:40px;height:1px;background-color:#1e3a8a;margin:0 auto 20px;"></div>
-              <!-- Badge -->
-              <div style="display:inline-block;background-color:#1e3a8a;border:1px solid #2563eb;padding:5px 16px;margin-bottom:20px;">
-                <span style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#93c5fd;">New Inquiry</span>
-              </div>
-              <h1 style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:700;color:#ffffff;letter-spacing:-0.5px;line-height:1.2;">
-                You've got a new<br><span style="color:transparent;-webkit-text-stroke:1px #3b82f6;">message.</span>
-              </h1>
+            <td style="padding:0 4px 18px;">
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td align="left" style="vertical-align:middle;">
+                    <img src="${logoUrl}" alt="elopre.dev" width="140" height="auto" style="display:block;height:46px;width:auto;border:0;outline:none;">
+                  </td>
+                  <td align="right" style="vertical-align:middle;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12px;color:#64748b;">
+                    just now
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
-          <!-- ── ACCENT BAR ── -->
+          <!-- Terminal window -->
           <tr>
-            <td style="height:3px;background:linear-gradient(90deg,#1e3a8a 0%,#3b82f6 50%,#1e3a8a 100%);"></td>
-          </tr>
+            <td style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;box-shadow:0 10px 24px -12px rgba(15,23,42,0.10);">
 
-          <!-- ── BODY ── -->
-          <tr>
-            <td style="background-color:#ffffff;padding:40px;">
-
-              <!-- Intro -->
-              <p style="margin:0 0 28px;font-size:15px;color:#64748b;line-height:1.7;">
-                A visitor submitted the contact form on your portfolio. Here are the details:
-              </p>
-
-              <!-- Detail rows -->
-              <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-collapse:collapse;margin-bottom:32px;">
-
+              <!-- Title bar -->
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background-color:#f1f5f9;border-bottom:1px solid #e2e8f0;">
                 <tr>
-                  <td style="padding:14px 18px;background-color:#f8fafc;border-bottom:1px solid #e2e8f0;width:130px;">
-                    <span style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;font-weight:700;">Full Name</span>
-                  </td>
-                  <td style="padding:14px 18px;background-color:#ffffff;border-bottom:1px solid #e2e8f0;">
-                    <span style="font-size:15px;color:#0f172a;font-weight:600;">${escapeHtml(fullName)}</span>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:14px 18px;background-color:#f8fafc;border-bottom:1px solid #e2e8f0;">
-                    <span style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;font-weight:700;">Email</span>
-                  </td>
-                  <td style="padding:14px 18px;background-color:#ffffff;border-bottom:1px solid #e2e8f0;">
-                    <a href="mailto:${escapeHtml(email)}" style="font-size:15px;color:#2563eb;text-decoration:none;font-weight:500;">${escapeHtml(email)}</a>
-                  </td>
-                </tr>
-
-                <tr>
-                  <td style="padding:14px 18px;background-color:#f8fafc;">
-                    <span style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#94a3b8;font-weight:700;">Service</span>
-                  </td>
-                  <td style="padding:14px 18px;background-color:#ffffff;">
-                    <span style="display:inline-block;background-color:#dbeafe;color:#1e3a8a;font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;font-weight:700;">${escapeHtml(service)}</span>
-                  </td>
-                </tr>
-
-              </table>
-
-              <!-- Message block -->
-              <div style="margin-bottom:32px;">
-                <div style="font-family:'Courier New',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#94a3b8;font-weight:700;margin-bottom:12px;">Message</div>
-                <div style="background-color:#f8fafc;border:1px solid #e2e8f0;border-left:3px solid #2563eb;padding:20px 22px;">
-                  <p style="margin:0;font-size:15px;color:#334155;line-height:1.8;">${safeMessageHtml}</p>
-                </div>
-              </div>
-
-              <!-- CTA -->
-              <table width="100%" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center">
-                    <a href="mailto:${escapeHtml(email)}" style="display:inline-block;background-color:#1e3a8a;color:#ffffff;font-family:'Courier New',monospace;font-size:11px;letter-spacing:2px;text-transform:uppercase;text-decoration:none;padding:14px 32px;font-weight:700;transition:background .3s;">
-                      Reply to ${escapeHtml(fullName)} →
-                    </a>
+                  <td style="padding:14px 18px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                      <tr>
+                        <td style="width:56px;vertical-align:middle;">
+                          <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#ef4444;margin-right:6px;"></span>
+                          <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#f59e0b;margin-right:6px;"></span>
+                          <span style="display:inline-block;width:11px;height:11px;border-radius:50%;background:#22c55e;"></span>
+                        </td>
+                        <td align="center" style="font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;vertical-align:middle;">
+                          <span style="color:#0f172a;font-weight:500;">inbox</span>/new-inquiry.log
+                        </td>
+                        <td align="right" style="width:70px;vertical-align:middle;">
+                          <span style="display:inline-block;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#2563eb;padding:4px 9px;border-radius:999px;background:#dbeafe;border:1px solid rgba(37,99,235,0.25);">
+                            ● new
+                          </span>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>
 
+              <!-- Body -->
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                  <td style="padding:26px 26px 24px;background:linear-gradient(180deg,#ffffff 0%,#f4f6fb 100%);">
+
+                    <p style="margin:0 0 6px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:13px;line-height:1.7;color:#64748b;">
+                      <span style="color:#2563eb;">guest@elopre.dev</span>
+                      <span style="color:#64748b;"> ~/inbox</span>
+                      <span style="color:#cbd5e1;"> %</span>
+                      <span style="color:#0f172a;"> cat new-inquiry.log</span>
+                    </p>
+                    <p style="margin:14px 0 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;">
+                      <span style="color:#cbd5e1;">// </span>Someone reached out through your portfolio contact form
+                    </p>
+
+                    <!-- Sender -->
+                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border:1px solid #e2e8f0;border-radius:10px;background-color:#f1f5f9;margin-bottom:16px;">
+                      <tr>
+                        <td style="padding:16px;">
+                          <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                            <tr>
+                              <td style="width:56px;vertical-align:top;">
+                                <div style="width:42px;height:42px;border-radius:9px;background:#dbeafe;border:1px solid rgba(37,99,235,0.3);color:#2563eb;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-weight:600;font-size:14px;line-height:42px;text-align:center;">
+                                  ${escapeHtml(initials)}
+                                </div>
+                              </td>
+                              <td style="vertical-align:top;">
+                                <div style="font-family:Manrope,Outfit,Segoe UI,Arial,sans-serif;font-weight:700;font-size:15px;color:#0f172a;letter-spacing:-0.01em;">
+                                  ${escapeHtml(fullName)}
+                                </div>
+                                <div style="margin-top:4px;">
+                                  <a href="mailto:${escapeHtml(email)}" style="font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;text-decoration:none;">
+                                    ${escapeHtml(email)}
+                                  </a>
+                                </div>
+                                <div style="margin-top:9px;">
+                                  <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:#dbeafe;border:1px solid rgba(37,99,235,0.3);color:#1e3a8a;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11.5px;">
+                                    ${escapeHtml(serviceSlug)}
+                                  </span>
+                                </div>
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Message code block -->
+                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#ffffff;margin-bottom:26px;">
+                      <tr>
+                        <td style="padding:9px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11.5px;color:#64748b;">
+                          📄 message.txt
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding:0;">
+                          <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                            <tr>
+                              <td width="40" valign="top" style="padding:16px 12px 16px 16px;border-right:1px solid #e2e8f0;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:14px;line-height:1.75;color:#cbd5e1;text-align:right;">
+                                1
+                              </td>
+                              <td valign="top" style="padding:16px 18px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:14px;line-height:1.75;color:#0f172a;word-break:break-word;">
+                                ${safeMessageHtml}
+                              </td>
+                            </tr>
+                          </table>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Reply -->
+                    <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                      <tr>
+                        <td align="center" style="padding-top:4px;">
+                          <a href="mailto:${escapeHtml(email)}?subject=${replySubject}" style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-weight:600;font-size:13.5px;padding:12px 20px;border-radius:10px;">
+                            <span style="opacity:0.75;">$</span> reply --to ${escapeHtml(replyName)}
+                          </a>
+                          <p style="margin:12px 0 0;font-family:Inter,Segoe UI,Arial,sans-serif;font-size:12.5px;color:#64748b;">
+                            Opens your default email app
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Status bar -->
+              <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f1f5f9;border-top:1px solid #e2e8f0;">
+                <tr>
+                  <td style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;">
+                    elopre.dev contact form
+                  </td>
+                  <td align="right" style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;">
+                    UTF-8
+                  </td>
+                </tr>
+              </table>
+
             </td>
           </tr>
 
-          <!-- ── FOOTER ── -->
           <tr>
-            <td style="background-color:#0d1b3e;padding:24px 40px;text-align:center;border-top:1px solid #1a2d5a;">
-              <p style="margin:0 0 6px;font-family:'Courier New',monospace;font-size:11px;letter-spacing:1px;color:#475569;text-transform:uppercase;">
-                Sent via the contact form at
-                <a href="https://elopre.dev" style="color:#3b82f6;text-decoration:none;">elopre.dev</a>
-              </p>
-              <p style="margin:0;font-size:11px;color:#334155;">
-                © ${new Date().getFullYear()} Jhon Elopre — All rights reserved
-              </p>
+            <td align="center" style="padding:22px 8px 0;font-size:11.5px;color:#64748b;">
+              © ${year} Jhon Elopre. All rights reserved.
             </td>
           </tr>
 
