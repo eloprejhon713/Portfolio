@@ -306,7 +306,7 @@
     to { opacity: 1; transform: none; }
   }
 
-  /* Sticky main header */
+  /* Sticky main header — solid bar so hero never shows through brand */
   .site-header {
     position: sticky;
     top: 0;
@@ -317,10 +317,11 @@
     gap: 1rem;
     margin: 0 -0.35rem 1.15rem;
     padding: 1rem 0.5rem 0.85rem;
-    background: transparent;
+    background: var(--bg);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-bottom: none;
+    border-bottom: 1px solid transparent;
+    box-shadow: 0 12px 20px -12px rgba(13, 27, 62, 0.08);
   }
   .site-header-brand {
     display: flex;
@@ -641,6 +642,8 @@
     position: relative;
     top: auto;
     margin-bottom: 0.65rem;
+    background: transparent;
+    box-shadow: none;
   }
   #panel-projects.panel.active {
     display: flex;
@@ -1392,7 +1395,7 @@
       top: 60px;
       margin: 60px -0.25rem 1rem;
       padding: 0.65rem 0.25rem 0.7rem;
-      background: transparent;
+      background: var(--bg);
       backdrop-filter: none;
       -webkit-backdrop-filter: none;
     }
@@ -1408,6 +1411,8 @@
       top: auto;
       margin-top: 60px;
       margin-bottom: 0.35rem;
+      background: transparent;
+      box-shadow: none;
     }
     #panel-projects .projects-header {
       padding: 0.35rem 0.1rem 0.9rem;
