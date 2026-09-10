@@ -24,6 +24,7 @@
     --border-dark: #cbd5e1;
     --surface:     #f1f5f9;
     --sidebar-w:   260px;
+    --nav-h:       4.55rem;
     --radius:      22px;
     --radius-sm:   14px;
     --shadow:      0 4px 24px rgba(13, 27, 62, 0.06);
@@ -171,7 +172,7 @@
     grid-template-columns: var(--sidebar-w) 1fr;
     min-height: 100vh;
     position: relative;
-    z-index: 1;
+    z-index: auto;
   }
 
   /* Mobile top bar */
@@ -179,8 +180,9 @@
     display: none;
     position: fixed; top: 0; left: 0; right: 0; z-index: 300;
     height: 60px; padding: 0 1rem;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(12px);
+    background: var(--white);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-bottom: 1px solid var(--border);
     align-items: center; justify-content: space-between;
   }
@@ -315,10 +317,10 @@
     gap: 1rem;
     margin: 0 -0.35rem 1.15rem;
     padding: 1rem 0.5rem 0.85rem;
-    background: rgba(238, 241, 248, 0.88);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: none;
   }
   .site-header-brand {
     display: flex;
@@ -619,6 +621,173 @@
   }
   .panel-head p { color: var(--text-muted); font-size: 0.9rem; max-width: 40ch; }
 
+  /* Projects: transparent header; cards scroll below (natural card size) */
+  body:has(#panel-projects.active) {
+    overflow: hidden;
+  }
+  body:has(#panel-projects.active) .panel-footer {
+    display: none;
+  }
+  body:has(#panel-projects.active) .main {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+  body:has(#panel-projects.active) .site-header {
+    flex-shrink: 0;
+    position: relative;
+    top: auto;
+    margin-bottom: 0.65rem;
+  }
+  #panel-projects.panel.active {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  #panel-projects .projects-header {
+    position: relative;
+    top: auto;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0.35rem 0.15rem 1rem;
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
+  }
+  #panel-projects .projects-heading {
+    min-width: 0;
+    flex: 1;
+  }
+  #panel-projects .projects-heading h2 {
+    font-size: clamp(2rem, 4vw, 2.625rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0 0 0.55rem;
+    color: var(--navy);
+  }
+  #panel-projects .projects-heading p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    max-width: 44ch;
+  }
+  #panel-projects .projects-filter {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding: 5px;
+    border-radius: 999px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+    position: relative;
+    z-index: 5;
+    pointer-events: auto;
+  }
+  #panel-projects .filter-btn {
+    border: none;
+    background: transparent;
+    font-family: var(--font);
+    font-size: 0.84375rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    padding: 8px 16px;
+    min-height: 40px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .18s ease, color .18s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    position: relative;
+    z-index: 1;
+    pointer-events: auto;
+  }
+  #panel-projects .filter-btn:hover {
+    color: var(--text);
+    background: transparent;
+  }
+  #panel-projects .filter-btn.active {
+    background: var(--navy);
+    color: var(--white);
+    box-shadow: none;
+  }
+  #panel-projects .filter-btn.active:hover {
+    background: var(--navy);
+    color: var(--white);
+  }
+  /* Scrollport only — grid inside keeps normal card sizing */
+  #panel-projects .projects-scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 0 0.15rem 1.5rem;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  #panel-projects .projects-scroll::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none;
+  }
+  #panel-projects .projects-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    align-content: start;
+    align-items: start;
+    grid-auto-rows: max-content;
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    overflow: visible;
+    flex: none;
+  }
+  #panel-projects .project-card {
+    display: flex;
+    flex-direction: column !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0;
+    width: 100%;
+    align-self: start;
+    flex: none !important;
+  }
+  #panel-projects .project-card.is-hidden {
+    display: none !important;
+  }
+  #panel-projects .project-img {
+    width: 100%;
+    height: 170px !important;
+    min-height: 170px;
+    max-height: 170px;
+    flex: 0 0 170px;
+  }
+  #panel-projects .project-body {
+    flex: 0 1 auto;
+  }
+  #panel-projects .projects-sentinel {
+    display: none;
+  }
+
   .section-card { padding: 1.5rem; }
 
   /* Services grid */
@@ -726,6 +895,7 @@
     border-radius: var(--radius); overflow: hidden;
     display: flex; flex-direction: column;
     transition: box-shadow .3s, transform .3s;
+    cursor: pointer;
   }
   .project-card:hover {
     box-shadow: 0 14px 40px rgba(13,27,62,0.1);
@@ -772,6 +942,91 @@
   }
 
   /* Video modal */
+
+  /* Project detail popup */
+  #project-modal {
+    position: fixed; inset: 0; z-index: 9700;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.25rem; opacity: 0; pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  #project-modal.open { opacity: 1; pointer-events: all; }
+  .project-modal-backdrop {
+    position: absolute; inset: 0; background: rgba(13, 27, 62, 0.55);
+  }
+  .project-modal-dialog {
+    position: relative; z-index: 1;
+    width: min(720px, 100%);
+    max-height: min(90dvh, 880px);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: 0 24px 64px rgba(13, 27, 62, 0.22);
+    transform: translateY(12px) scale(0.98);
+    transition: transform .25s ease;
+  }
+  #project-modal.open .project-modal-dialog { transform: none; }
+  .project-modal-close {
+    position: absolute; top: 0.85rem; right: 0.85rem; z-index: 2;
+    width: 40px; height: 40px; border-radius: 12px;
+    border: 1px solid var(--border); background: rgba(255,255,255,0.95);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--navy);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .project-modal-close:hover { background: var(--off-white); }
+  .project-modal-close svg {
+    width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8;
+  }
+  .project-modal-media {
+    width: 100%;
+    max-height: min(58dvh, 520px);
+    background: var(--surface);
+    flex-shrink: 0;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .project-modal-media img {
+    width: 100%;
+    height: auto;
+    max-height: min(58dvh, 520px);
+    object-fit: contain;
+    display: block;
+  }
+  .project-modal-body {
+    padding: 1.25rem 1.35rem 1.5rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .project-modal-type {
+    font-size: 0.72rem; font-weight: 600; color: var(--text-muted);
+    letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.45rem;
+  }
+  .project-modal-meta {
+    display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;
+    margin-bottom: 0.65rem;
+  }
+  .project-modal-title {
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    font-weight: 800; letter-spacing: -0.03em; color: var(--navy);
+    margin: 0 0 0.75rem; line-height: 1.2;
+  }
+  .project-modal-desc {
+    font-size: 0.95rem; color: var(--text-muted); line-height: 1.7;
+    margin: 0 0 1.1rem;
+  }
+  .project-modal-tags {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+  }
+  .project-card:focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 3px;
+  }
 
   /* Resume banner */
   #resume-banner {
@@ -1109,6 +1364,7 @@
       grid-column: auto; grid-row: auto;
     }
     .projects-grid { grid-template-columns: repeat(2, 1fr); }
+    #panel-projects .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 
   @media (max-width: 900px) {
@@ -1117,7 +1373,7 @@
     .sidebar-overlay { display: block; }
     .sidebar {
       position: fixed; top: 0; left: 0; height: 100%; width: min(300px, 86vw);
-      z-index: 250; padding: 1rem; transform: translateX(-105%);
+      z-index: 260; padding: 1rem; transform: translateX(-105%);
       transition: transform .3s ease;
       pointer-events: none;
     }
@@ -1125,16 +1381,58 @@
       transform: translateX(0);
       pointer-events: auto;
     }
+    .sidebar-overlay {
+      z-index: 250;
+    }
+    .mobile-bar {
+      z-index: 300;
+    }
     .main { padding: 0 1rem 2rem; }
     .site-header {
       top: 60px;
       margin: 60px -0.25rem 1rem;
       padding: 0.65rem 0.25rem 0.7rem;
-      background: rgba(238, 241, 248, 0.94);
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
     .site-header-brand { display: none; }
     .site-header .btn-pill { margin-left: auto; }
     .home-top { flex-direction: column; align-items: flex-start; }
+    body:has(#panel-projects.active) .main {
+      height: 100dvh;
+      max-height: 100dvh;
+    }
+    body:has(#panel-projects.active) .site-header {
+      position: relative;
+      top: auto;
+      margin-top: 60px;
+      margin-bottom: 0.35rem;
+    }
+    #panel-projects .projects-header {
+      padding: 0.35rem 0.1rem 0.9rem;
+      align-items: flex-start;
+      gap: 1.15rem;
+      position: relative;
+      z-index: 6;
+      pointer-events: auto;
+    }
+    #panel-projects .projects-filter {
+      width: 100%;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      overflow: visible;
+      gap: 6px;
+      border-radius: 18px;
+    }
+    #panel-projects .filter-btn {
+      min-height: 44px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+    }
+    #panel-projects .projects-grid {
+      grid-template-columns: 1fr;
+    }
     .bento { grid-template-columns: 1fr; }
     .services-grid, .about-grid, .contact-grid, .projects-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
@@ -1337,16 +1635,16 @@
                   <span class="slide-label">Food Hub</span>
                 </div>
                 <div class="slide">
-                  <img src="assets/images/student.png" alt="ACTS Student Portal">
-                  <span class="slide-label">ACTS Student</span>
+                  <img src="assets/images/student.png" alt="Student Portal">
+                  <span class="slide-label">Student Portal</span>
                 </div>
                 <div class="slide">
-                  <img src="assets/images/parents.png" alt="ACTS Parent Portal">
-                  <span class="slide-label">ACTS Parent</span>
+                  <img src="assets/images/parents.png" alt="Parents Portal">
+                  <span class="slide-label">Parents Portal</span>
                 </div>
                 <div class="slide">
-                  <img src="assets/images/employee.png" alt="ACTS Employee Portal">
-                  <span class="slide-label">ACTS Employee</span>
+                  <img src="assets/images/employee.png" alt="Employee Portal">
+                  <span class="slide-label">Employee Portal</span>
                 </div>
                 <div class="slide">
                   <img src="assets/images/baranggay.png" alt="Barangay Management System">
@@ -1478,19 +1776,19 @@
               <div class="hl-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>
               </div>
-              <div><strong>ACTS Student Portal</strong><span>Live campus portal for students</span></div>
+              <div><strong>Student Portal</strong><span>Live campus portal for students</span></div>
             </div>
             <div class="hl-item">
               <div class="hl-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c1.2-3.2 3.5-4.8 6-4.8S13.8 15.8 15 19"/><path d="M14 14.5c1.8-.2 3.5.6 4.8 2.5"/></svg>
               </div>
-              <div><strong>ACTS Parent Portal</strong><span>Parent access to school records</span></div>
+              <div><strong>Parents Portal</strong><span>Parent access to school records</span></div>
             </div>
             <div class="hl-item">
               <div class="hl-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
               </div>
-              <div><strong>ACTS Employee Portal</strong><span>Staff tools &amp; workflows</span></div>
+              <div><strong>Employee Portal</strong><span>Staff tools &amp; workflows</span></div>
             </div>
           </div>
         </a>
@@ -1499,20 +1797,22 @@
 
     <!-- PROJECTS -->
     <section class="panel" id="panel-projects">
-      <div class="panel-head">
-        <div>
+      <div class="projects-sentinel" id="projectsSentinel" aria-hidden="true"></div>
+      <header class="projects-header" id="projectsHeader">
+        <div class="projects-heading">
           <h2>Projects</h2>
-          <p>ACTS Colleges portals, freelance systems, thesis AI, games, and production apps.</p>
+          <p>Student, parents &amp; employee portals, freelance systems, thesis AI, games, and production apps.</p>
         </div>
-        <div class="projects-filter">
-          <button class="filter-btn active" onclick="filterProjects('all',this)">All</button>
-          <button class="filter-btn" onclick="filterProjects('web',this)">Web</button>
-          <button class="filter-btn" onclick="filterProjects('mobile',this)">Mobile</button>
-          <button class="filter-btn" onclick="filterProjects('game',this)">Game</button>
-          <button class="filter-btn" onclick="filterProjects('algorithm',this)">Algorithm</button>
-          <button class="filter-btn" onclick="filterProjects('thesis',this)">Thesis</button>
+        <div class="projects-filter" id="filters" role="group" aria-label="Filter projects">
+          <button type="button" class="filter-btn active" data-filter="all">All</button>
+          <button type="button" class="filter-btn" data-filter="web">Web</button>
+          <button type="button" class="filter-btn" data-filter="mobile">Mobile</button>
+          <button type="button" class="filter-btn" data-filter="game">Game</button>
+          <button type="button" class="filter-btn" data-filter="algorithm">Algorithm</button>
+          <button type="button" class="filter-btn" data-filter="thesis">Thesis</button>
         </div>
-      </div>
+      </header>
+      <div class="projects-scroll" id="projectsScroll">
       <div class="projects-grid" id="projectsGrid">
 
         <div class="project-card reveal" data-cat="game" data-title="Fluppybrid">
@@ -1579,50 +1879,50 @@
           </div>
         </div>
 
-        <div class="project-card reveal" data-cat="web" data-title="ACTS Student Portal">
+        <div class="project-card reveal" data-cat="web" data-title="Student Portal">
           <div class="project-img">
-            <img class="project-cover" src="assets/images/student.png" alt="ACTS Student Portal"
+            <img class="project-cover" src="assets/images/student.png" alt="Student Portal"
               onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
               onerror="this.style.display='none';">
             <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
           </div>
           <div class="project-body">
-            <div class="project-type">Production · ACTS Colleges</div>
+            <div class="project-type">Production · Campus Web</div>
             <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Production</span></div>
-            <div class="project-name">ACTS Student Portal</div>
+            <div class="project-name">Student Portal</div>
             <p class="project-desc">Student-facing campus portal for account access, academic records, and school services — built for real phone widths so students never need Desktop mode.</p>
             <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span><span class="project-tag">PHP</span></div>
           </div>
         </div>
 
-        <div class="project-card reveal" data-cat="web" data-title="ACTS Parent Portal">
+        <div class="project-card reveal" data-cat="web" data-title="Parents Portal">
           <div class="project-img">
-            <img class="project-cover" src="assets/images/parents.png" alt="ACTS Parent Portal"
+            <img class="project-cover" src="assets/images/parents.png" alt="Parents Portal"
               onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
               onerror="this.style.display='none';">
             <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
           </div>
           <div class="project-body">
-            <div class="project-type">Production · ACTS Colleges</div>
+            <div class="project-type">Production · Campus Web</div>
             <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Production</span></div>
-            <div class="project-name">ACTS Parent Portal</div>
-            <p class="project-desc">Parent portal for monitoring student progress, school communications, and related records — streamlined UI for families on desktop and mobile.</p>
+            <div class="project-name">Parents Portal</div>
+            <p class="project-desc">Parents portal for monitoring student progress, school communications, and related records — streamlined UI for families on desktop and mobile.</p>
             <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span><span class="project-tag">PHP</span></div>
           </div>
         </div>
 
-        <div class="project-card reveal" data-cat="web" data-title="ACTS Employee Portal">
+        <div class="project-card reveal" data-cat="web" data-title="Employee Portal">
           <div class="project-img">
-            <img class="project-cover" src="assets/images/employee.png" alt="ACTS Employee Portal"
+            <img class="project-cover" src="assets/images/employee.png" alt="Employee Portal"
               onload="this.parentElement.querySelector('.project-img-ph').style.display='none';"
               onerror="this.style.display='none';">
             <div class="project-img-ph"><svg width="44" height="44" viewBox="0 0 44 44" fill="none" stroke="#1e3a8a" stroke-width="1"><rect x="4" y="4" width="36" height="36" rx="2"/><circle cx="16" cy="16" r="4"/><path d="M4 30l10-10 8 8 6-6 12 12"/></svg><span>Add screenshot</span></div>
           </div>
           <div class="project-body">
-            <div class="project-type">Production · ACTS Colleges</div>
+            <div class="project-type">Production · Campus Web</div>
             <div class="project-meta"><span class="project-cat">Web</span><span class="project-year">Production</span></div>
-            <div class="project-name">ACTS Employee Portal</div>
-            <p class="project-desc">Employee-facing portal for campus staff workflows, internal tools, and institutional operations across ACTS Colleges.</p>
+            <div class="project-name">Employee Portal</div>
+            <p class="project-desc">Employee-facing portal for campus staff workflows, internal tools, and institutional operations.</p>
             <div class="project-tags"><span class="project-tag">HTML</span><span class="project-tag">CSS</span><span class="project-tag">JavaScript</span><span class="project-tag">PHP</span></div>
           </div>
         </div>
@@ -1738,6 +2038,7 @@
           </a>
           <a href="#contact" class="btn-view-work" data-nav="contact">Get in Touch →</a>
         </div>
+      </div>
       </div>
     </section>
 
@@ -1964,6 +2265,25 @@
   </div>
 </div>
 
+<div id="project-modal" aria-hidden="true">
+  <div class="project-modal-backdrop" data-close-project-modal></div>
+  <div class="project-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
+    <button type="button" class="project-modal-close" id="projectModalClose" aria-label="Close project">
+      <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="project-modal-media">
+      <img id="projectModalImg" src="" alt="">
+    </div>
+    <div class="project-modal-body">
+      <div class="project-modal-type" id="projectModalType"></div>
+      <div class="project-modal-meta" id="projectModalMeta"></div>
+      <h3 class="project-modal-title" id="projectModalTitle"></h3>
+      <p class="project-modal-desc" id="projectModalDesc"></p>
+      <div class="project-modal-tags" id="projectModalTags"></div>
+    </div>
+  </div>
+</div>
+
 <!-- CHATBOT -->
 <button id="chat-toggle" aria-label="Open chat assistant">
   <div class="chat-badge"></div>
@@ -1999,6 +2319,7 @@
   <div class="chat-powered">Powered by elopre.dev</div>
 </div>
 
+<script src="resumeChatbot.js"></script>
 <script>
   /* ── LOADER ── */
   const loaderEl = document.getElementById('loader');
@@ -2060,6 +2381,21 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
     closeSidebar();
     panel.querySelectorAll('.reveal:not(.visible)').forEach(el => obs.observe(el));
+    if (id === 'projects') {
+      const scroller = document.getElementById('projectsScroll');
+      const grid = document.getElementById('projectsGrid');
+      if (scroller) scroller.scrollTop = 0;
+      if (grid) {
+        grid.querySelectorAll('.project-card').forEach(card => {
+          card.classList.add('visible');
+          if (card.classList.contains('is-hidden')) return;
+          card.style.display = '';
+          card.style.opacity = '';
+          card.style.transform = '';
+          card.style.pointerEvents = '';
+        });
+      }
+    }
   }
 
   document.querySelectorAll('[data-nav]').forEach(el => {
@@ -2134,21 +2470,114 @@
 
   /* ── PROJECT FILTER ── */
   function filterProjects(cat, btn) {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    document.querySelectorAll('.project-card').forEach(card => {
+    const filtersRoot = document.getElementById('filters');
+    if (filtersRoot) {
+      filtersRoot.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    } else {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    }
+    if (btn) btn.classList.add('active');
+    const scroller = document.getElementById('projectsScroll');
+    if (scroller) scroller.scrollTop = 0;
+    document.querySelectorAll('#projectsGrid .project-card').forEach(card => {
       const match = cat === 'all' || card.dataset.cat === cat;
-      card.style.transition = 'opacity .35s ease, transform .35s ease';
       if (match) {
-        card.style.opacity = '1'; card.style.transform = '';
-        card.style.pointerEvents = ''; card.style.display = 'flex';
+        card.classList.remove('is-hidden');
+        card.style.display = '';
+        card.style.opacity = '';
+        card.style.transform = '';
+        card.style.pointerEvents = '';
+        card.classList.add('visible');
       } else {
-        card.style.opacity = '0'; card.style.transform = 'scale(0.96)';
-        card.style.pointerEvents = 'none';
-        setTimeout(() => { if (card.style.opacity === '0') card.style.display = 'none'; }, 350);
+        card.classList.add('is-hidden');
       }
     });
   }
+
+  const filtersEl = document.getElementById('filters');
+  if (filtersEl) {
+    filtersEl.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn || !filtersEl.contains(btn)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const cat = btn.getAttribute('data-filter') || 'all';
+      filterProjects(cat, btn);
+    });
+  }
+
+  /* ── PROJECT DETAIL POPUP ── */
+  const projectModal = document.getElementById('project-modal');
+  const projectModalImg = document.getElementById('projectModalImg');
+  const projectModalType = document.getElementById('projectModalType');
+  const projectModalMeta = document.getElementById('projectModalMeta');
+  const projectModalTitle = document.getElementById('projectModalTitle');
+  const projectModalDesc = document.getElementById('projectModalDesc');
+  const projectModalTags = document.getElementById('projectModalTags');
+  const projectModalClose = document.getElementById('projectModalClose');
+
+  function openProjectModal(card) {
+    if (!projectModal || !card) return;
+    const img = card.querySelector('.project-cover');
+    const type = card.querySelector('.project-type');
+    const meta = card.querySelector('.project-meta');
+    const name = card.querySelector('.project-name');
+    const desc = card.querySelector('.project-desc');
+    const tags = card.querySelector('.project-tags');
+
+    if (projectModalImg) {
+      projectModalImg.src = img ? img.getAttribute('src') || '' : '';
+      projectModalImg.alt = (name && name.textContent) || (img && img.alt) || 'Project';
+    }
+    if (projectModalType) projectModalType.textContent = type ? type.textContent.trim() : '';
+    if (projectModalMeta) projectModalMeta.innerHTML = meta ? meta.innerHTML : '';
+    if (projectModalTitle) projectModalTitle.textContent = name ? name.textContent.trim() : '';
+    if (projectModalDesc) projectModalDesc.textContent = desc ? desc.textContent.trim() : '';
+    if (projectModalTags) projectModalTags.innerHTML = tags ? tags.innerHTML : '';
+
+    projectModal.classList.add('open');
+    projectModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    if (projectModalClose) projectModalClose.focus();
+  }
+
+  function closeProjectModal() {
+    if (!projectModal) return;
+    projectModal.classList.remove('open');
+    projectModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  const projectsGridEl = document.getElementById('projectsGrid');
+  if (projectsGridEl) {
+    projectsGridEl.querySelectorAll('.project-card').forEach(card => {
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+    });
+    projectsGridEl.addEventListener('click', (e) => {
+      const card = e.target.closest('.project-card');
+      if (!card || card.classList.contains('is-hidden')) return;
+      openProjectModal(card);
+    });
+    projectsGridEl.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = e.target.closest('.project-card');
+      if (!card || card.classList.contains('is-hidden')) return;
+      e.preventDefault();
+      openProjectModal(card);
+    });
+  }
+
+  if (projectModalClose) projectModalClose.addEventListener('click', closeProjectModal);
+  if (projectModal) {
+    const backdrop = projectModal.querySelector('[data-close-project-modal]');
+    if (backdrop) backdrop.addEventListener('click', closeProjectModal);
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && projectModal && projectModal.classList.contains('open')) {
+      closeProjectModal();
+    }
+  });
 
   /* ── API base (Render backend when hosted on GitHub Pages) ── */
   const API_BASE = (() => {
@@ -2234,49 +2663,11 @@
   }
 
   /* ── CHATBOT ── */
-  /* Resume Q&A — first person as Jhon; facts from Junior Programmer-Elopre, Jhon.pdf */
+  /* Intent-scored resume Q&A (resumeChatbot.js); first person as Jhon */
   function answerFromResume(question) {
-    const t = String(question || '').toLowerCase().trim();
-    if (!t) return "I don't have that detail here. Feel free to email me at eloprepotchy@gmail.com for more information.";
-
-    const contact = "You can reach me at eloprepotchy@gmail.com or +639369881562. LinkedIn: https://www.linkedin.com/in/jhon-elopre-083778369/. I'm based at NBP Reservation Magdaong Drive, Poblacion, Muntinlupa City.";
-    const experience = "I currently work as a Developer at a private school in Taguig. I also freelance as a Web & Mobile Developer (January 2023 – Present), building responsive websites and SPAs with HTML, CSS, JavaScript, PHP, Bootstrap, and React.js, as well as Flutter mobile apps with REST API integration.\n\nI previously served as Intern Programmer (August 12 – November 17, 2025), contributing to an Alumni Tracking System and OJT Portal—implementing record workflows, improving Bootstrap UI, and helping deliver systems that manage 500+ records.";
-    const freelance = "My freelance portfolio includes:\n\n• Barangay Management System — resident profiling, records, document requests, and printable Barangay Clearance generation.\n• Traffic Routing with Genetic Algorithms & Big Data — smarter routes, reduced congestion, and data-driven recommendations.\n• Alumni Tracking System — profiling, employment tracking, announcements, and institutional reporting.\n• AI Budget Decision Support System — predictive analytics for small-business expense and income forecasting.\n\nI also built Food Hub (Flutter/Dart food ordering app with Firebase & MySQL) and games: Find the Five Stars (Node.js), Fluppybrid (Dart/Flutter), and Eagle's Path (Python/Pygame).";
-    const thesis = "My thesis projects are:\n\n• LSTM-Based NLP Career Recommendation System — personalized career suggestions using LSTM, NLP, OCR (Tesseract), and GloVe embeddings in Python.\n• SupplySyncApp — a Flutter app with a PHP API for supply requests, inventory monitoring, approvals, and facility reservations.";
-    const skills = "I work with HTML, CSS, JavaScript, React.js, and Bootstrap on the frontend; PHP, Python, Node.js, MySQL, and Firebase on the backend; Flutter for mobile; and Python with LSTM, NLP, OCR, and predictive analytics for AI/ML. I use Git, GitHub, and CI/CD for version control and delivery.";
-    const about = "I'm Jhon Elopre, a Full-Stack Web & Mobile Developer. I graduated with a BS in Computer Science from Pamantasan ng Lungsod ng Muntinlupa (2021–2025). I'm currently working as a Developer at a private school in Taguig, and I also freelance on web and mobile projects. I've built systems like Alumni Tracking and Barangay Management, plus AI work such as an LSTM-based career recommendation system.";
-
-    if (/(contact|email|phone|linkedin|hire|reach|get in touch|address)/.test(t)) return contact;
-    if (/(work experience|experience|intern|freelance developer|job|employment|ojt)/.test(t)) return experience;
-    if (/(thesis)/.test(t) || /(lstm|career recommendation|supplysync|supply sync|reservation)/.test(t)) {
-      if (/lstm|career/.test(t)) return "I developed an LSTM-Based NLP Career Recommendation System using LSTM, NLP, OCR (Tesseract), and GloVe embeddings in Python. It matches student skills to career paths and provides personalized roadmaps.";
-      if (/supply|reservation/.test(t)) return "SupplySyncApp is my Flutter mobile system with a PHP backend for supply requests, low-stock inventory monitoring, admin/staff approvals, and facility reservation booking.";
-      return thesis;
+    if (window.ResumeChatbot && typeof window.ResumeChatbot.chatbot === 'function') {
+      return window.ResumeChatbot.chatbot(question).text;
     }
-    if (/food hub|foodhub|food order|ordering app/.test(t)) {
-      return "I built Food Hub — a Flutter/Dart mobile food ordering app. Browse menus, add to cart, pay with GCash and other options, track orders in real time, and manage accounts. It uses Firebase and MySQL on the backend.";
-    }
-    if (/eagle|eagle'?s path|python game/.test(t)) {
-      return "I built Eagle's Path — a Flappy Bird–inspired pixel-art game in Python with Pygame. Press Space to flap, dodge wooden logs, track your best score, and restart for endless flights.";
-    }
-    if (/fluppy|flappy|dart game/.test(t)) {
-      return "I built Fluppybrid — a Flappy Bird–style 2D mobile game with Dart and Flutter. Tap to flap, dodge wooden obstacles, chase high scores, and restart quickly for endless gameplay.";
-    }
-    if (/find|five stars|platform|puzzle game|nodejs game|node\.?js game/.test(t)) {
-      return "I built Find the Five Stars — a 2D platform puzzle game with Node.js. Players collect five hidden stars, dodge spikes and enemies, use keys and hints, and reach the goal across increasingly challenging levels.";
-    }
-    if (/(freelance project|freelance projects|project portfolio|projects|systems have you built)/.test(t)) return freelance;
-    if (/barangay/.test(t)) return "My Barangay Management System handles resident profiling, record keeping, and document request tracking, including a Barangay Clearance feature to create, generate, and print official documents with less manual paperwork.";
-    if (/traffic|genetic|routing|congestion/.test(t)) return "I built a traffic routing system using Genetic Algorithms and Big Data Analytics to optimize travel paths, reduce congestion, and provide data-driven routing recommendations.";
-    if (/alumni/.test(t)) return "My Alumni Tracking System centralizes alumni profiling, batch management, employment status, and contact updates, with announcements, verification, and reporting. During my internship, I helped deliver systems managing 500+ records.";
-    if (/budget|predictive|decision support|dss|small business/.test(t)) return "I built a cloud-based decision support system that uses AI predictive analytics to forecast expenses and income for small businesses, delivering real-time financial insights and automated budget planning.";
-    if (/(certification|certificate|great learning)/.test(t)) return "I hold certifications in Python Fundamentals for Beginners and Python for Data Science from Great Learning Academy.";
-    if (/(education|school|college|university|plmun|degree|graduate)/.test(t)) return "I graduated with a Bachelor of Science in Computer Science from Pamantasan ng Lungsod ng Muntinlupa (February 2021 – December 2025). I completed Senior High School (ICT Strand) at Muntinlupa National High School Main (June 2017 – March 2021). I'm currently working as a Developer at a private school in Taguig.";
-    if (/(tech stack|skills|technologies|tools|react|flutter|php|python|stack)/.test(t)) return skills;
-    if (/(achievement|award|competition|olympics|huawei|robotics)/.test(t)) return "I've competed in the Huawei 9th ICT Competition, the 13th IT Skills Olympics, and E-ROVOUTIKA: E-ROBOT V1 Robotics Competition.";
-    if (/(acts|student portal|parent portal|employee portal)/.test(t)) return "I also built live ACTS Colleges portals: Student (https://student.actscolleges.edu.ph/studentportal.html), Parent (https://parent.actscolleges.edu.ph/), and Employee (https://employee.actscolleges.edu.ph/).";
-    if (/(who is|about jhon|about you|summary|introduce)/.test(t)) return about;
-    if (/(service|offer|what do you do)/.test(t)) return about + "\n\n" + skills;
     return "I don't have that detail here. Feel free to email me at eloprepotchy@gmail.com for more information.";
   }
 
@@ -2295,12 +2686,14 @@
   const chatSend     = document.getElementById('chat-send');
   const suggestions  = document.getElementById('chat-suggestions');
 
-  const ALL_SUGGESTIONS = [
-    "What's your work experience?",
-    "Tell me about your freelance projects",
-    "What are your thesis projects?",
-    "How can I contact Jhon?",
-  ];
+  const ALL_SUGGESTIONS = (window.ResumeChatbot && window.ResumeChatbot.suggestedQuestions)
+    ? window.ResumeChatbot.suggestedQuestions.slice(0, 4)
+    : [
+      "What services do you offer?",
+      "What technologies do you use?",
+      "What projects have you worked on?",
+      "How can I contact you?",
+    ];
   let remainingSuggestions = ALL_SUGGESTIONS.slice();
 
   let isOpen    = false;

@@ -272,8 +272,23 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ reply: "Please keep your question under 2000 characters." });
     }
 
+    // Intent-scored resume chatbot (greetings / thanks / topic answers)
+    const localReply = answerFromResume(question);
+    const probe = String(question).toLowerCase().trim();
+    const isSocial =
+      /^(hi|hello|hey|yo|good\s*(morning|afternoon|evening))\b[!.,?\s]*$/i.test(probe)
+      || /^(hi|hello|hey)\s+(there|jhon|everyone)?[!.,?\s]*$/i.test(probe)
+      || /^(thanks+|thank\s*you+|thankyou+|ty|thx|salamat)\b[!.,?\s]*$/i.test(probe)
+      || /^(thanks+|thank\s*you+|thankyou+)\s+(so\s+much|a\s+lot|po)?[!.,?\s]*$/i.test(probe);
+
+    if (isSocial) {
+      return res.json({ reply: localReply, source: "greeting" });
+    }
+
+    // Prefer local resume chatbot; optional Anthropic only if key is set and local fell back
+    const looksLikeFallback = /I can answer questions about my services/i.test(localReply);
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (apiKey) {
+    if (apiKey && looksLikeFallback) {
       const safeHistory = messages
         .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
         .slice(-12)
@@ -302,7 +317,7 @@ app.post("/api/chat", async (req, res) => {
       console.error("Anthropic chat error:", data?.error || data);
     }
 
-    return res.json({ reply: answerFromResume(question), source: "resume" });
+    return res.json({ reply: localReply, source: "resume" });
   } catch (error) {
     console.error("Chat route failed:", error);
     const fallbackQ = toSafeString(req.body?.message) ||

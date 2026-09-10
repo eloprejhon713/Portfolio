@@ -3,9 +3,9 @@
 ## images/ → project cards + Home carousel
 | File | Project |
 |---|---|
-| `student.png` | ACTS Student Portal |
-| `parents.png` | ACTS Parent Portal |
-| `employee.png` | ACTS Employee Portal |
+| `student.png` | Student Portal |
+| `parents.png` | Parents Portal |
+| `employee.png` | Employee Portal |
 | `baranggay.png` | Barangay Management System |
 | `traffic.png` | Traffic Routing |
 | `alumni.png` | Alumni Tracking System |
@@ -17,6 +17,6 @@ Still missing a cover for SupplySyncApp — add e.g. `supplysync.png` when ready
 ## videos/
 | File | Watch Demo |
 |---|---|
-| `acts-student.mp4` | ACTS Student |
-| `acts-parent.mp4` | ACTS Parent |
-| `acts-employee.mp4` | ACTS Employee |
+| `acts-student.mp4` | Student Portal |
+| `acts-parent.mp4` | Parents Portal |
+| `acts-employee.mp4` | Employee Portal |
