@@ -146,8 +146,8 @@ app.post("/api/contact", async (req, res) => {
             <td style="padding:0 4px 18px;">
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 <tr>
-                  <td align="left" style="vertical-align:middle;">
-                    <img src="${logoUrl}" alt="elopre.dev" width="140" height="auto" style="display:block;height:46px;width:auto;border:0;outline:none;">
+                  <td align="left" style="vertical-align:middle;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12px;color:#64748b;">
+                    elopre.dev
                   </td>
                   <td align="right" style="vertical-align:middle;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12px;color:#64748b;">
                     just now
@@ -277,10 +277,11 @@ app.post("/api/contact", async (req, res) => {
               <!-- Status bar -->
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="background:#f1f5f9;border-top:1px solid #e2e8f0;">
                 <tr>
-                  <td style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;">
-                    elopre.dev contact form
+                  <td style="padding:10px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;vertical-align:middle;">
+                    <img src="${logoUrl}" alt="elopre.dev" width="88" height="auto" style="display:inline-block;height:22px;width:auto;vertical-align:middle;border:0;outline:none;margin-right:10px;">
+                    <span style="vertical-align:middle;">contact form</span>
                   </td>
-                  <td align="right" style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;">
+                  <td align="right" style="padding:11px 20px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:11px;color:#64748b;vertical-align:middle;">
                     UTF-8
                   </td>
                 </tr>
