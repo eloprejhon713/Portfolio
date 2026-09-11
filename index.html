@@ -1224,18 +1224,21 @@
     width: 40px; height: 40px;
     background: transparent;
     border-radius: 10px; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; position: relative; overflow: hidden; padding: 0;
+    flex-shrink: 0; position: relative; overflow: visible; padding: 0;
   }
   .chat-avatar img {
     width: 100%; height: 100%; object-fit: cover; display: block;
+    border-radius: 10px;
   }
   .chat-avatar-dot {
-    position: absolute; bottom: -2px; right: -2px; width: 10px; height: 10px;
-    background: #22c55e; border-radius: 50%; border: 2px solid var(--navy);
+    position: absolute; bottom: -1px; right: -1px; width: 12px; height: 12px;
+    background: #4ade80; border-radius: 50%; border: 2px solid var(--navy);
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.35);
+    z-index: 2;
   }
   .chat-header-info { flex: 1; }
   .chat-header-name { font-size: 0.95rem; font-weight: 700; color: var(--white); margin-bottom: 3px; }
-  .chat-header-status { font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; color: #22c55e; font-weight: 600; }
+  .chat-header-status { font-size: 0.65rem; letter-spacing: 0.06em; text-transform: uppercase; color: #4ade80; font-weight: 700; }
   .chat-header-tag {
     font-size: 0.6rem; letter-spacing: 0.08em; text-transform: uppercase;
     color: rgba(255,255,255,0.4); border: 1px solid rgba(255,255,255,0.15);
@@ -1372,7 +1375,7 @@
   .suggestion-chip {
     font-size: 0.7rem; font-weight: 500; color: var(--navy-light);
     border: 1px solid rgba(30, 58, 138, 0.35);
-    background: transparent;
+    background: #ffffff;
     padding: 0.35rem 0.7rem; border-radius: 999px; cursor: pointer;
     transition: background 0.2s, color 0.2s, border-color 0.2s;
     pointer-events: auto;
@@ -1554,7 +1557,7 @@
           <a href="https://www.linkedin.com/in/jhon-elopre-083778369/" target="_blank" rel="noopener" aria-label="LinkedIn">
             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="">
           </a>
-          <a href="https://www.facebook.com/tamesa2014" target="_blank" rel="noopener" aria-label="Facebook">
+          <a href="https://www.facebook.com/profile.php?id=61591551539446" target="_blank" rel="noopener" aria-label="Facebook">
             <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="">
           </a>
           <a href="https://www.instagram.com/itsmepotchy/" target="_blank" rel="noopener" aria-label="Instagram">
@@ -2272,7 +2275,7 @@
             <a href="https://www.linkedin.com/in/jhon-elopre-083778369/" target="_blank" class="social-pill">
               <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="" class="social-icon"><span>LinkedIn</span>
             </a>
-            <a href="https://www.facebook.com/tamesa2014" target="_blank" class="social-pill">
+            <a href="https://www.facebook.com/profile.php?id=61591551539446" target="_blank" class="social-pill">
               <img src="https://cdn-icons-png.flaticon.com/512/733/733547.png" alt="" class="social-icon"><span>Facebook</span>
             </a>
             <a href="https://www.instagram.com/itsmepotchy/" target="_blank" class="social-pill">
