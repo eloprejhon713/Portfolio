@@ -421,15 +421,7 @@ const responses = {
 };
 
 function fallbackResponse() {
-  return `I can answer questions about my services, technologies, projects, AI experience, freelance/internship work, education, certifications, competitions, and contact info.
-
-Try asking:
-• "What services do you offer?"
-• "What technologies do you use?"
-• "What projects have you developed?"
-• "Do you have experience with AI?"
-
-Or email me at eloprepotchy@gmail.com.`;
+  return `I'm sorry, but I can only assist with questions related to my professional experience, services, technologies, projects, education, certifications, and contact information. Please feel free to ask me about any of these topics`;
 }
 
 function isGreeting(t) {

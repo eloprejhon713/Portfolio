@@ -360,7 +360,7 @@ app.post("/api/chat", async (req, res) => {
     }
 
     // Prefer local resume chatbot; optional Anthropic only if key is set and local fell back
-    const looksLikeFallback = /I can answer questions about my services/i.test(localReply);
+    const looksLikeFallback = /I can only assist with questions related to my professional experience/i.test(localReply);
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (apiKey && looksLikeFallback) {
       const safeHistory = messages
