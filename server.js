@@ -3,7 +3,7 @@ const express = require("express");
 const { Resend } = require("resend");
 require("dotenv").config();
 
-const { answerFromResume, PORTFOLIO_SYSTEM } = require("./resumeAnswers");
+const { answerFromResume, PORTFOLIO_SYSTEM } = require("./js/resumeAnswers");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -123,7 +123,7 @@ app.post("/api/contact", async (req, res) => {
   const safeMessageHtml = escapeHtml(message).replace(/\n/g, "<br>");
   const replySubject = encodeURIComponent("Re: Your inquiry on elopre.dev");
   const year = new Date().getFullYear();
-  const logoUrl = "https://eloprejhon713.github.io/Portfolio/assets/images/logonobg.png";
+  const logoUrl = "https://eloprejhon713.github.io/Portfolio/assets/images/brand/logonobg.png";
 
   const mailOptions = {
   from: getFromAddress(),

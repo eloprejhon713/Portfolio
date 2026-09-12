@@ -1,6 +1,8 @@
 node_modules/
 .env
-
 nodejs.msi
 *.msi
-
+.DS_Store
+Thumbs.db
+*.log
+_reorganize.py

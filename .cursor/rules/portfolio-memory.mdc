@@ -1,0 +1,15 @@
+---
+description: Read Portfolio project memory before editing elopre.dev
+alwaysApply: true
+---
+
+# Portfolio (elopre.dev)
+
+Before editing this repo, read `docs/PROJECT_MEMORY.md` and map the user’s words to the listed files.
+
+- Keep `index.html` at repo root (GitHub Pages).
+- Keep `server.js` at repo root (Render).
+- Styles → `css/styles.css`; page logic → `js/main.js`; chatbot → `js/resumeChatbot.js`.
+- Brand / project / profile images live under `assets/images/{brand,projects,profile}/`.
+- Resume PDF → `assets/documents/`.
+- Do not commit `.env` or installer `.msi` files.
