@@ -386,15 +386,35 @@
   }
   .btn-pill {
     display: inline-flex; align-items: center; gap: 0.55rem;
-    background: var(--navy); color: var(--white);
-    padding: 0.8rem 1.35rem; border-radius: 999px;
+    background: var(--white); color: var(--navy);
+    padding: 0.8rem 1.35rem; border-radius: 12px;
     text-decoration: none; font-weight: 600; font-size: 0.9rem;
     white-space: nowrap; flex-shrink: 0;
-    transition: background .2s, transform .2s;
-    border: none; cursor: pointer;
+    border: 1.5px solid var(--border-dark);
+    box-shadow: 0 2px 8px rgba(13, 27, 62, 0.06);
+    cursor: pointer;
+    transition: background .25s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color .25s cubic-bezier(0.4, 0, 0.2, 1),
+                color .25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow .25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform .25s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .btn-pill:hover { background: var(--blue); transform: translateY(-1px); }
-  .btn-pill svg { width: 16px; height: 16px; stroke: var(--blue-soft); fill: none; stroke-width: 1.8; }
+  .btn-pill:hover {
+    border-color: var(--blue); color: var(--blue);
+    background: var(--blue-pale);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+    transform: translateY(-1px);
+  }
+  .btn-pill:active { transform: scale(0.98); }
+  .btn-pill .btn-icon,
+  .btn-pill svg {
+    width: 18px; height: 18px; flex-shrink: 0;
+    stroke: currentColor; fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: transform .3s ease;
+  }
+  .btn-pill:hover .btn-icon,
+  .btn-pill:hover svg { transform: translateX(3px); }
 
   /* Tools strip */
   .tools-bar {
@@ -1114,60 +1134,122 @@
   .form-group textarea { min-height: 110px; resize: vertical; }
   .form-submit {
     width: 100%; margin-top: 0.35rem;
-    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
-    background: var(--navy); color: white; border: none; border-radius: 999px;
-    padding: 0.85rem 1.25rem; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-    transition: background .2s;
+    position: relative;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+    background: var(--navy); color: var(--white); border: none; border-radius: 12px;
+    padding: 1rem 1.5rem; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; letter-spacing: 0.2px;
+    box-shadow: 0 4px 14px rgba(13, 27, 62, 0.35);
+    transition: background .25s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow .25s cubic-bezier(0.4, 0, 0.2, 1),
+                transform .25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
   }
-  .form-submit:hover { background: var(--blue); }
-  .form-submit svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .form-submit:hover:not(:disabled) {
+    background: var(--navy-mid);
+    box-shadow: 0 6px 20px rgba(13, 27, 62, 0.45);
+    transform: translateY(-1px);
+  }
+  .form-submit:active:not(:disabled) { transform: scale(0.98); }
+  .form-submit:disabled { cursor: not-allowed; opacity: 0.92; }
+  .form-submit .btn-icon {
+    width: 18px; height: 18px; flex-shrink: 0;
+    stroke: currentColor; fill: none; stroke-width: 2;
+    stroke-linecap: round; stroke-linejoin: round;
+    transition: transform .3s ease;
+  }
+  .form-submit:hover:not(:disabled) .btn-icon { transform: translateX(3px); }
   .form-success { display: none; }
 
-  /* Site alert modal */
+  /* Site alert / send overlay */
   #site-modal {
     position: fixed; inset: 0; z-index: 9600;
     display: flex; align-items: center; justify-content: center;
-    padding: 1.25rem; opacity: 0; pointer-events: none;
-    transition: opacity .25s ease;
+    padding: 1.25rem; opacity: 0; pointer-events: none; visibility: hidden;
+    background: rgba(7, 8, 16, 0.55);
+    backdrop-filter: blur(3px);
+    transition: opacity .25s ease, visibility .25s ease;
   }
-  #site-modal.open { opacity: 1; pointer-events: all; }
-  .site-modal-backdrop {
-    position: absolute; inset: 0; background: rgba(7, 8, 16, 0.55);
-    backdrop-filter: blur(6px);
-  }
+  #site-modal.open { opacity: 1; pointer-events: all; visibility: visible; }
+  .site-modal-backdrop { display: none; }
   .site-modal-dialog {
-    position: relative; z-index: 1; width: min(400px, 100%);
+    position: relative; z-index: 1; width: min(380px, 100%);
     background: var(--white); border-radius: 20px;
-    border: 1px solid var(--border); box-shadow: 0 24px 64px rgba(13,27,62,0.28);
-    padding: 1.75rem 1.5rem 1.35rem; text-align: center;
-    transform: translateY(12px) scale(0.96);
-    transition: transform .28s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 20px 60px rgba(7, 8, 16, 0.3);
+    padding: 2.75rem 3rem; text-align: center;
+    display: flex; flex-direction: column; align-items: center;
+    transform: scale(0.9) translateY(10px);
+    transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  #site-modal.open .site-modal-dialog { transform: none; }
+  #site-modal.open .site-modal-dialog { transform: scale(1) translateY(0); }
+
+  .overlay-spinner {
+    position: relative; width: 84px; height: 84px; margin-bottom: 1.5rem;
+  }
+  .overlay-spinner .ring {
+    position: absolute; inset: 0; border-radius: 22px;
+    background: conic-gradient(from 0deg, var(--blue-pale) 0%, var(--blue-soft) 30%, var(--navy) 50%, var(--blue-soft) 70%, var(--blue-pale) 100%);
+    animation: ring-spin 2.6s ease-in-out infinite;
+  }
+  .overlay-spinner .inner {
+    position: absolute; inset: 4px; border-radius: 19px; background: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(13, 27, 62, 0.04);
+  }
+  .overlay-spinner .inner img {
+    width: 92%; height: 92%; object-fit: contain; display: block;
+  }
+  @keyframes ring-spin { to { transform: rotate(360deg); } }
+  .overlay-dots span {
+    display: inline-block; opacity: 0.25;
+    animation: dot-fade 1.2s ease-in-out infinite;
+  }
+  .overlay-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .overlay-dots span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes dot-fade {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  .overlay-loading-text {
+    font-size: 0.95rem; font-weight: 600; color: var(--text);
+  }
+
   .site-modal-icon {
-    width: 56px; height: 56px; border-radius: 16px; margin: 0 auto 1rem;
+    width: 56px; height: 56px; border-radius: 14px; margin: 0 auto 1.25rem;
     display: flex; align-items: center; justify-content: center;
   }
-  .site-modal-icon svg { width: 28px; height: 28px; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .site-modal-icon svg { width: 26px; height: 26px; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
   .site-modal-icon.success { background: #dcfce7; color: #16a34a; }
   .site-modal-icon.success svg { stroke: #16a34a; }
   .site-modal-icon.error { background: #fee2e2; color: #dc2626; }
   .site-modal-icon.error svg { stroke: #dc2626; }
   .site-modal-icon.info { background: var(--blue-pale); color: var(--navy-light); }
   .site-modal-icon.info svg { stroke: var(--navy-light); }
+  .site-modal-icon .checkmark path {
+    stroke-dasharray: 24; stroke-dashoffset: 24;
+    animation: draw-check 0.35s ease forwards 0.05s;
+  }
+  @keyframes draw-check { to { stroke-dashoffset: 0; } }
   .site-modal-title {
-    font-size: 1.15rem; font-weight: 700; color: var(--navy); margin-bottom: 0.45rem;
+    font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-bottom: 0.5rem;
   }
   .site-modal-msg {
-    font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.35rem;
+    font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1.75rem;
   }
   .site-modal-ok {
     width: 100%; border: none; border-radius: 999px; cursor: pointer;
-    padding: 0.8rem 1.25rem; font-size: 0.9rem; font-weight: 600;
+    padding: 0.95rem 1.5rem; font-size: 0.95rem; font-weight: 600;
     background: var(--navy); color: #fff; font-family: inherit;
-    transition: background .2s;
+    transition: background .25s, transform .25s;
   }
-  .site-modal-ok:hover { background: var(--blue); }
+  .site-modal-ok:hover { background: var(--navy-mid); transform: translateY(-1px); }
+  #site-modal.is-loading .site-modal-icon,
+  #site-modal.is-loading .site-modal-title,
+  #site-modal.is-loading .site-modal-msg,
+  #site-modal.is-loading .site-modal-ok { display: none; }
+  #site-modal:not(.is-loading) .overlay-spinner,
+  #site-modal:not(.is-loading) .overlay-loading-text { display: none; }
 
   .panel-footer {
     margin-top: 1.5rem; text-align: center;
@@ -1606,8 +1688,10 @@
         <span>elopre<em>.dev</em></span>
       </a>
       <a href="#contact" class="btn-pill" data-nav="contact">
-        Get in touch
-        <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M6 8h4M8 6l2 2-2 2"/></svg>
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        <span>Get in touch</span>
       </a>
     </header>
 
@@ -2291,19 +2375,31 @@
               <div class="form-group"><label for="lname">Last Name</label><input type="text" id="lname" placeholder="Doe" required></div>
             </div>
             <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" placeholder="you@example.com" required></div>
-            <div class="form-group">
-              <label for="service">Service Interested In</label>
-              <select id="service">
-                <option value="" disabled selected>Select a service</option>
-                <option>Web Development</option>
-                <option>Mobile Development</option>
-                <option>Desktop Development</option>
-                <option>Algorithm Design</option>
-                <option>Other</option>
-              </select>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="phone">Contact Number</label>
+                <input type="tel" id="phone" name="phone" placeholder="09XXXXXXXXX" inputmode="numeric" pattern="[0-9]{11}" maxlength="11" minlength="11" required autocomplete="tel" title="Enter exactly 11 digits">
+              </div>
+              <div class="form-group">
+                <label for="service">Service Interested In</label>
+                <select id="service">
+                  <option value="" disabled selected>Select a service</option>
+                  <option>Web Development</option>
+                  <option>Mobile Development</option>
+                  <option>Desktop Development</option>
+                  <option>Algorithm Design</option>
+                  <option>Other</option>
+                </select>
+              </div>
             </div>
             <div class="form-group"><label for="message">Message</label><textarea id="message" placeholder="Tell me about your project..." required></textarea></div>
-            <button type="submit" class="form-submit">Send Message <svg viewBox="0 0 16 16"><path d="M3 8h10M9 4l4 4-4 4"/></svg></button>
+            <button type="submit" class="form-submit" id="sendBtn">
+              <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 2L11 13"></path>
+                <path d="M22 2l-7 20-4-9-9-4 20-7z"></path>
+              </svg>
+              <span>Send message</span>
+            </button>
           </form>
           <div class="form-success" id="formSuccess" aria-hidden="true"></div>
         </div>
@@ -2314,12 +2410,19 @@
   </main>
 </div>
 
-<!-- SITE ALERT MODAL -->
+<!-- SITE ALERT / SEND OVERLAY -->
 <div id="site-modal" aria-hidden="true">
   <div class="site-modal-backdrop" data-close-modal></div>
   <div class="site-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="siteModalTitle">
+    <div class="overlay-spinner" id="siteModalSpinner" aria-hidden="true">
+      <div class="ring"></div>
+      <div class="inner">
+        <img src="assets/images/logonobg.png" alt="elopre.dev">
+      </div>
+    </div>
+    <div class="overlay-loading-text" id="siteModalLoadingText">Sending message<span class="overlay-dots"><span>.</span><span>.</span><span>.</span></span></div>
     <div class="site-modal-icon success" id="siteModalIcon" aria-hidden="true">
-      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>
+      <svg class="checkmark" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
     </div>
     <div class="site-modal-title" id="siteModalTitle">Success</div>
     <p class="site-modal-msg" id="siteModalMsg">Your message was sent.</p>
@@ -2666,13 +2769,19 @@
   const siteModalOk = document.getElementById('siteModalOk');
 
   const MODAL_ICONS = {
-    success: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9"/></svg>',
+    success: '<svg class="checkmark" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>',
     error: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>',
     info: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
   };
 
+  function showSendLoader() {
+    siteModal.classList.add('is-loading', 'open');
+    siteModal.setAttribute('aria-hidden', 'false');
+  }
+
   function openSiteModal(type, title, message) {
     const kind = MODAL_ICONS[type] ? type : 'info';
+    siteModal.classList.remove('is-loading');
     siteModalIcon.className = 'site-modal-icon ' + kind;
     siteModalIcon.innerHTML = MODAL_ICONS[kind];
     siteModalTitle.textContent = title || '';
@@ -2683,31 +2792,49 @@
   }
 
   function closeSiteModal() {
-    siteModal.classList.remove('open');
+    if (siteModal.classList.contains('is-loading')) return;
+    siteModal.classList.remove('open', 'is-loading');
     siteModal.setAttribute('aria-hidden', 'true');
   }
 
   siteModalOk.addEventListener('click', closeSiteModal);
   siteModal.querySelector('[data-close-modal]').addEventListener('click', closeSiteModal);
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && siteModal.classList.contains('open')) closeSiteModal();
+    if (e.key === 'Escape' && siteModal.classList.contains('open') && !siteModal.classList.contains('is-loading')) {
+      closeSiteModal();
+    }
   });
 
   /* ── CONTACT FORM ── */
+  const phoneInput = document.getElementById('phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', () => {
+      phoneInput.value = phoneInput.value.replace(/\D/g, '').slice(0, 11);
+    });
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
     const btn = form.querySelector('.form-submit');
-    const originalBtnHtml = btn.innerHTML;
+    if (siteModal.classList.contains('open')) return;
+
+    const phone = document.getElementById('phone').value.trim();
+    if (!/^\d{11}$/.test(phone)) {
+      openSiteModal('error', 'Invalid contact number', 'Please enter a valid 11-digit contact number.');
+      return;
+    }
+
     const payload = {
       firstName: document.getElementById('fname').value.trim(),
       lastName:  document.getElementById('lname').value.trim(),
       email:     document.getElementById('email').value.trim(),
+      phone,
       service:   document.getElementById('service').value,
       message:   document.getElementById('message').value.trim()
     };
-    btn.textContent = 'Sending...';
     btn.disabled = true;
+    showSendLoader();
     try {
       const response = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
@@ -2721,7 +2848,6 @@
     } catch (err) {
       openSiteModal('error', 'Unable to send', err.message || 'Please try again in a moment, or email me directly at eloprepotchy@gmail.com.');
     } finally {
-      btn.innerHTML = originalBtnHtml;
       btn.disabled = false;
     }
   }

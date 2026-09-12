@@ -58,10 +58,11 @@ function validateInput(body) {
   const firstName = toSafeString(body.firstName);
   const lastName = toSafeString(body.lastName);
   const email = toSafeString(body.email);
+  const phone = toSafeString(body.phone).replace(/\D/g, "");
   const service = toSafeString(body.service) || "Not specified";
   const message = toSafeString(body.message);
 
-  if (!firstName || !lastName || !email || !message) {
+  if (!firstName || !lastName || !email || !phone || !message) {
     return { error: "Please complete all required fields." };
   }
 
@@ -70,11 +71,15 @@ function validateInput(body) {
     return { error: "Please provide a valid email address." };
   }
 
+  if (!/^\d{11}$/.test(phone)) {
+    return { error: "Please provide a valid 11-digit contact number." };
+  }
+
   if (message.length > 4000) {
     return { error: "Message is too long. Please keep it under 4000 characters." };
   }
 
-  return { data: { firstName, lastName, email, service, message } };
+  return { data: { firstName, lastName, email, phone, service, message } };
 }
 
 // Check if Resend email config exists (HTTPS API — works on Render; Gmail SMTP times out there)
@@ -106,7 +111,7 @@ app.post("/api/contact", async (req, res) => {
     });
   }
 
-  const { firstName, lastName, email, service, message } = validated.data;
+  const { firstName, lastName, email, phone, service, message } = validated.data;
   const fullName = `${firstName} ${lastName}`.trim();
   const initials = `${(firstName[0] || "").toUpperCase()}${(lastName[0] || "").toUpperCase()}` || "?";
   const replyName = (firstName || fullName.split(/\s+/)[0] || "guest").toLowerCase();
@@ -125,7 +130,7 @@ app.post("/api/contact", async (req, res) => {
   to: process.env.CONTACT_TO,
   replyTo: email,
   subject: `New Inquiry from ${fullName} — ${service}`,
-  text: `New Client Inquiry\n\nName: ${fullName}\nEmail: ${email}\nService: ${service}\n\nMessage:\n${message}\n\n---\nSent via elopre.dev contact form`,
+  text: `New Client Inquiry\n\nName: ${fullName}\nEmail: ${email}\nContact Number: ${phone}\nService: ${service}\n\nMessage:\n${message}\n\n---\nSent via elopre.dev contact form`,
   html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -143,17 +148,10 @@ app.post("/api/contact", async (req, res) => {
 
           <!-- Top bar -->
           <tr>
-            <td style="padding:0 4px 18px;">
-              <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                <tr>
-                  <td align="left" style="vertical-align:middle;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12px;color:#64748b;">
-                    elopre.dev
-                  </td>
-                  <td align="right" style="vertical-align:middle;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12px;color:#64748b;">
-                    just now
-                  </td>
-                </tr>
-              </table>
+            <td style="padding:0 4px 18px;" align="right">
+              <span style="font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12px;color:#64748b;">
+                just now
+              </span>
             </td>
           </tr>
 
@@ -228,6 +226,12 @@ app.post("/api/contact", async (req, res) => {
                                 <div style="margin-top:4px;">
                                   <a href="mailto:${escapeHtml(email)}" style="font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;text-decoration:none;">
                                     ${escapeHtml(email)}
+                                  </a>
+                                </div>
+                                <div style="margin-top:6px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:12.5px;color:#64748b;">
+                                  <span style="color:#94a3b8;">Contact:</span>
+                                  <a href="tel:${escapeHtml(phone)}" style="color:#0f172a;text-decoration:none;font-weight:500;margin-left:6px;">
+                                    ${escapeHtml(phone)}
                                   </a>
                                 </div>
                                 <div style="margin-top:9px;">
