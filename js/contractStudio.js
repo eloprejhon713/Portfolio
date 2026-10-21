@@ -305,7 +305,7 @@ label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spa
       <button class="btn p" id="go" type="submit"><span id="goText">Open studio</span></button>
     </form>
     <div class="or">or</div>
-    <a class="btn g" id="back" href="https://elopre.dev">
+    <a class="btn g" id="back" href="/">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       Back to portfolio
     </a>
