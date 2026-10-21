@@ -4,6 +4,7 @@
  */
 
 const crypto = require("crypto");
+const { renderAgreementHtml } = require("./agreementPrint");
 
 const COOKIE = "elopre_studio";
 const SERVICES = [
@@ -504,24 +505,11 @@ function formPage() {
           <option value="confidential">Confidential</option>
         </select>
         <div class="actions noprint">
-          <button class="primary" type="submit" name="mode" value="download">Download .md</button>
-          <button class="ghost" type="submit" name="mode" value="preview">Preview</button>
+          <button class="primary" type="submit" name="mode" value="preview">Preview / PDF</button>
+          <button class="ghost" type="submit" name="mode" value="download">Download .md</button>
           <a class="btn ghost" href="/studio/logout">Log out</a>
         </div>
       </form>
-    </div>`);
-}
-
-function previewPage(markdown, filename) {
-  return shell("Agreement preview — elopre.dev", `
-    <div class="brand noprint"><img src="/assets/images/brand/logonobg.png" alt="">elopre<em style="color:#2563eb;font-style:normal">.dev</em></div>
-    <div class="card">
-      <div class="actions noprint" style="margin-top:0;margin-bottom:16px">
-        <a class="btn primary" href="/studio">Back to form</a>
-        <button class="ghost" type="button" onclick="window.print()">Print / PDF</button>
-      </div>
-      <p class="sub noprint">File name: ${esc(filename)} — print to PDF if you want a signed copy.</p>
-      <pre>${esc(markdown)}</pre>
     </div>`);
 }
 
@@ -565,7 +553,7 @@ function mount(app) {
     const markdown = buildAgreement(body);
     const filename = filenameFor(body);
     if (body.mode === "preview") {
-      return res.send(previewPage(markdown, filename));
+      return res.send(renderAgreementHtml(body));
     }
     res.setHeader("Content-Type", "text/markdown; charset=utf-8");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
