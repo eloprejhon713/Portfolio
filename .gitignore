@@ -2,6 +2,7 @@ node_modules/
 .env
 contracts/
 assets/documents/Agreement.pdf
+_inspect-pdf.mjs
 nodejs.msi
 *.msi
 .DS_Store

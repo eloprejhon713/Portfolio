@@ -49,6 +49,8 @@ app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true })); // extended: true is safer for nested objects
 contractStudio.mount(app);
 app.use("/contracts", (_req, res) => res.status(404).end());
+app.use("/templates", (_req, res) => res.status(404).end());
+app.use("/assets/documents/Agreement.pdf", (_req, res) => res.status(404).end());
 app.use(express.static(path.join(__dirname)));
 
 // Utility: trim strings

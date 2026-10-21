@@ -5,6 +5,7 @@
 
 const crypto = require("crypto");
 const { renderAgreementHtml } = require("./agreementPrint");
+const { fillAgreementPdf } = require("./fillAgreementPdf");
 
 const COOKIE = "elopre_studio";
 const SERVICES = [
@@ -299,7 +300,7 @@ function formPage() {
           <option value="confidential">Confidential</option>
         </select>
         <div class="actions noprint">
-          <button class="primary" type="submit" name="mode" value="preview">Preview / PDF</button>
+          <button class="primary" type="submit" name="mode" value="pdf">Print / PDF</button>
           <button class="ghost" type="submit" name="mode" value="download">Download .md</button>
           <a class="btn ghost" href="/studio/logout">Log out</a>
         </div>
@@ -307,8 +308,8 @@ function formPage() {
     </div>`);
 }
 
-function filenameFor(body) {
-  return `Elopre-Agreement-${slug(body.clientName)}-${slug(body.projectName)}.md`;
+function filenameFor(body, ext) {
+  return `Elopre-Agreement-${slug(body.clientName)}-${slug(body.projectName)}.${ext}`;
 }
 
 function noindex(res) {
@@ -340,17 +341,24 @@ function mount(app) {
     return res.redirect(303, "/studio");
   });
 
-  app.post("/studio/generate", (req, res) => {
+  app.post("/studio/generate", async (req, res) => {
     noindex(res);
     if (!configured() || !isAuthed(req)) return res.redirect(303, "/studio");
     const body = req.body || {};
-    const markdown = buildAgreement(body);
-    const filename = filenameFor(body);
-    if (body.mode === "preview") {
-      return res.send(renderAgreementHtml(body));
+    if (body.mode === "pdf" || body.mode === "preview") {
+      try {
+        const pdf = await fillAgreementPdf(body);
+        res.setHeader("Content-Type", "application/pdf");
+        res.setHeader("Content-Disposition", `inline; filename="${filenameFor(body, "pdf")}"`);
+        return res.send(pdf);
+      } catch (error) {
+        console.error("Agreement PDF failed:", error);
+        return res.send(renderAgreementHtml(body));
+      }
     }
+    const markdown = buildAgreement(body);
     res.setHeader("Content-Type", "text/markdown; charset=utf-8");
-    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${filenameFor(body, "md")}"`);
     return res.send(markdown);
   });
 }
