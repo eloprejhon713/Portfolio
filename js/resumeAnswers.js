@@ -1,6 +1,6 @@
 /**
  * Resume Q&A for Jhon Elopre — delegates to intent-scored resumeChatbot.
- * Keeps PORTFOLIO_SYSTEM for optional Anthropic enrichment.
+ * Keeps PORTFOLIO_SYSTEM for optional Gemini enrichment.
  */
 
 const { chatbot, resumeKnowledge } = require("./resumeChatbot");

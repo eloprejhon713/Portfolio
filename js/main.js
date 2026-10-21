@@ -271,6 +271,13 @@
     return "https://portfolio-1-f9t6.onrender.com";
   })();
 
+  document.addEventListener("keydown", (e) => {
+    if (!(e.ctrlKey || e.metaKey) || !e.shiftKey) return;
+    if (e.key !== "A" && e.key !== "a") return;
+    e.preventDefault();
+    window.location.href = `${API_BASE}/studio`;
+  });
+
   /* ── SITE MODAL ── */
   const siteModal = document.getElementById('site-modal');
   const siteModalIcon = document.getElementById('siteModalIcon');
@@ -631,3 +638,127 @@
     chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
   }
   chatInput.addEventListener('input', autoResize);
+
+  /* ── GITHUB ACTIVITY ── */
+  (function initGithubActivity() {
+    const grid = document.getElementById('gh-grid');
+    const monthsEl = document.getElementById('gh-months');
+    const statsEl = document.getElementById('gh-stats');
+    const rangeEl = document.getElementById('gh-range');
+    const avgEl = document.getElementById('gh-avg');
+    const tip = document.getElementById('gh-tip');
+    const sc = document.getElementById('gh-scroll');
+    if (!grid || !monthsEl || !statsEl) return;
+
+    const USER = 'eloprejhon713';
+    const iso = (d) =>
+      d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const level = (n) => (n === 0 ? 0 : n <= 2 ? 1 : n <= 5 ? 2 : n <= 9 ? 3 : 4);
+
+    function render(data) {
+      const end = new Date();
+      end.setHours(0, 0, 0, 0);
+      const first = new Date(end);
+      first.setDate(first.getDate() - end.getDay() - 52 * 7);
+
+      grid.innerHTML = '';
+      monthsEl.innerHTML = '';
+
+      let total = 0;
+      let best = { n: 0, d: null };
+      let longest = 0;
+      let run = 0;
+      let lastMonth = -1;
+      const days = [];
+
+      for (let d = new Date(first); d <= end; d.setDate(d.getDate() + 1)) {
+        const date = new Date(d);
+        const n = data[iso(date)] || 0;
+        const w = Math.floor((date - first) / 604800000 + 0.01);
+        days.push({ date, n });
+        total += n;
+        if (n > best.n) best = { n, d: date };
+        run = n > 0 ? run + 1 : 0;
+        longest = Math.max(longest, run);
+
+        const c = document.createElement('div');
+        c.className = 'gh-cell';
+        c.dataset.l = String(level(n));
+        c.style.setProperty('--w', w);
+        c.dataset.n = String(n);
+        c.dataset.d = date.toLocaleDateString('en-US', {
+          weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+        });
+        grid.appendChild(c);
+
+        if (date.getDate() <= 7 && date.getDay() === 0 && date.getMonth() !== lastMonth) {
+          lastMonth = date.getMonth();
+          const m = document.createElement('span');
+          m.textContent = date.toLocaleDateString('en-US', { month: 'short' });
+          m.style.left = (w * 18) + 'px';
+          monthsEl.appendChild(m);
+        }
+      }
+
+      let cur = 0;
+      for (let i = days.length - 1; i >= 0; i--) {
+        if (days[i].n > 0) cur++;
+        else if (i === days.length - 1) continue;
+        else break;
+      }
+      const active = days.filter((x) => x.n > 0).length;
+      const unit = (v, label) => `<b>${v}<small> ${label}</small></b>`;
+      const stats = [
+        ['Contributions', `<b>${total.toLocaleString()}</b>`],
+        ['Active days', `<b>${active}</b>`],
+        ['Current streak', unit(cur, cur === 1 ? 'day' : 'days')],
+        ['Longest streak', unit(longest, longest === 1 ? 'day' : 'days')],
+        ['Best day', unit(best.n, best.d ? best.d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '')]
+      ];
+      statsEl.innerHTML = stats.map(([l, v]) => `<div class="gh-stat"><span>${l}</span>${v}</div>`).join('');
+      rangeEl.textContent =
+        first.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) +
+        ' – ' +
+        end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      avgEl.innerHTML =
+        'Average of <b>' + (active ? (total / active).toFixed(1) : 0) + '</b> contributions per active day';
+
+      if (sc) sc.scrollLeft = sc.scrollWidth;
+    }
+
+    if (tip) {
+      grid.addEventListener('mouseover', (e) => {
+        const c = e.target.closest('.gh-cell');
+        if (!c) return;
+        const r = c.getBoundingClientRect();
+        const n = +c.dataset.n;
+        tip.innerHTML =
+          '<b>' +
+          (n === 0 ? 'No contributions' : n + ' contribution' + (n > 1 ? 's' : '')) +
+          '</b> · ' +
+          c.dataset.d;
+        tip.style.left = (r.left + r.width / 2) + 'px';
+        tip.style.top = r.top + 'px';
+        tip.classList.add('on');
+      });
+      grid.addEventListener('mouseleave', () => tip.classList.remove('on'));
+    }
+
+    fetch('https://github-contributions-api.jogruber.de/v4/' + USER)
+      .then((res) => {
+        if (!res.ok) throw new Error('GitHub contributions unavailable');
+        return res.json();
+      })
+      .then((json) => {
+        const data = {};
+        (json.contributions || []).forEach((day) => {
+          data[day.date] = Number(day.count) || 0;
+        });
+        render(data);
+      })
+      .catch(() => {
+        render({});
+        rangeEl.textContent = 'Unavailable';
+        avgEl.textContent = 'Could not load live GitHub contributions.';
+      });
+  })();

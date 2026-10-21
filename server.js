@@ -4,6 +4,7 @@ const { Resend } = require("resend");
 require("dotenv").config();
 
 const { answerFromResume, PORTFOLIO_SYSTEM } = require("./js/resumeAnswers");
+const contractStudio = require("./js/contractStudio");
 
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
@@ -11,17 +12,27 @@ const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
   : null;
 
-// Allow GitHub Pages (and local) to call the API on Render
-const ALLOWED_ORIGINS = new Set([
-  "https://eloprejhon713.github.io",
-  "http://localhost:3000",
-  "http://127.0.0.1:3000",
-  "https://portfolio-1-f9t6.onrender.com",
-]);
+// GitHub Pages / elopre.dev call this API on Render
+function isAllowedOrigin(origin) {
+  if (!origin) return false;
+  try {
+    const { hostname } = new URL(origin);
+    return (
+      hostname === "elopre.dev" ||
+      hostname === "www.elopre.dev" ||
+      hostname === "eloprejhon713.github.io" ||
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".onrender.com")
+    );
+  } catch {
+    return false;
+  }
+}
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (origin && ALLOWED_ORIGINS.has(origin)) {
+  if (origin && isAllowedOrigin(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
     res.setHeader("Vary", "Origin");
     res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -36,6 +47,8 @@ app.use((req, res, next) => {
 // Parse JSON and URL-encoded data
 app.use(express.json({ limit: "1mb" }));
 app.use(express.urlencoded({ extended: true })); // extended: true is safer for nested objects
+contractStudio.mount(app);
+app.use("/contracts", (_req, res) => res.status(404).end());
 app.use(express.static(path.join(__dirname)));
 
 // Utility: trim strings
@@ -322,7 +335,85 @@ app.post("/api/contact", async (req, res) => {
   }
 });
 
-// Chatbot — resume answers (optional Anthropic if ANTHROPIC_API_KEY is set)
+function geminiContentsFromHistory(messages, question) {
+  const safeHistory = (Array.isArray(messages) ? messages : [])
+    .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+    .slice(-12)
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: String(m.content).slice(0, 2000) }],
+    }));
+
+  if (safeHistory.length) return safeHistory;
+  return [{ role: "user", parts: [{ text: question }] }];
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isGeminiBusy(status, error) {
+  const code = error && error.code;
+  const name = String((error && error.status) || "");
+  return status === 429 || status === 503 || code === 429 || code === 503 || name === "UNAVAILABLE" || name === "RESOURCE_EXHAUSTED";
+}
+
+async function callGeminiOnce(apiKey, model, question, messages) {
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: PORTFOLIO_SYSTEM }] },
+        contents: geminiContentsFromHistory(messages, question),
+        generationConfig: { maxOutputTokens: 400, temperature: 0.4 },
+      }),
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+  const error = data.error || null;
+  if (!response.ok) {
+    return { ok: false, busy: isGeminiBusy(response.status, error), error };
+  }
+  const reply = (data.candidates || [])
+    .flatMap((c) => (c.content && Array.isArray(c.content.parts) ? c.content.parts : []))
+    .map((p) => p.text || "")
+    .join("")
+    .trim();
+  return { ok: true, reply: reply || "" };
+}
+
+async function askGemini(question, messages) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return { reply: null, busy: false };
+
+  const primary = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const models = [...new Set([primary, "gemini-2.5-flash", "gemini-3.8-flash"])];
+  let sawBusy = false;
+
+  for (const model of models) {
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const result = await callGeminiOnce(apiKey, model, question, messages);
+      if (result.ok && result.reply) {
+        return { reply: result.reply, busy: false };
+      }
+      if (result.ok && !result.reply) break;
+      if (result.busy) {
+        sawBusy = true;
+        console.warn(`Gemini busy (${model}, try ${attempt}/3)`);
+        if (attempt < 3) await sleep(attempt * 1200);
+        continue;
+      }
+      console.error("Gemini chat error:", result.error);
+      break;
+    }
+  }
+
+  return { reply: null, busy: sawBusy };
+}
+
+// Chatbot — resume answers, Gemini when GEMINI_API_KEY is set
 app.post("/api/chat", async (req, res) => {
   try {
     const messages = Array.isArray(req.body?.messages) ? req.body.messages : [];
@@ -336,7 +427,6 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ reply: "Please keep your question under 2000 characters." });
     }
 
-    // Intent-scored resume chatbot (greetings / thanks / topic answers)
     const localReply = answerFromResume(question);
     const probe = String(question).toLowerCase().trim();
     const isSocial =
@@ -349,36 +439,15 @@ app.post("/api/chat", async (req, res) => {
       return res.json({ reply: localReply, source: "greeting" });
     }
 
-    // Prefer local resume chatbot; optional Anthropic only if key is set and local fell back
-    const looksLikeFallback = /I can only assist with questions related to my professional experience/i.test(localReply);
-    const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (apiKey && looksLikeFallback) {
-      const safeHistory = messages
-        .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
-        .slice(-12)
-        .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }));
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: process.env.ANTHROPIC_MODEL || "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: PORTFOLIO_SYSTEM,
-          messages: safeHistory.length ? safeHistory : [{ role: "user", content: question }],
-        }),
+    const gemini = await askGemini(question, messages);
+    if (gemini.reply) {
+      return res.json({ reply: gemini.reply, source: "gemini" });
+    }
+    if (gemini.busy) {
+      return res.json({
+        reply: "I'm a bit busy right now — please ask again in a moment.",
+        source: "gemini-busy",
       });
-
-      const data = await response.json();
-      if (response.ok && Array.isArray(data.content)) {
-        const reply = data.content.filter((b) => b.type === "text").map((b) => b.text).join("").trim();
-        if (reply) return res.json({ reply, source: "anthropic" });
-      }
-      console.error("Anthropic chat error:", data?.error || data);
     }
 
     return res.json({ reply: localReply, source: "resume" });
