@@ -39,12 +39,13 @@
 | Resume download overlay | `js/main.js` → `assets/documents/Junior-Programmer-Elopre-Jhon.pdf` |
 | Chat widget | `js/main.js` → `POST /api/chat` → Gemini (`GEMINI_API_KEY`) or `js/resumeChatbot.js` |
 | Inquiry email HTML | `server.js` (logo: `assets/images/brand/logonobg.png` on GitHub Pages) |
+| Contract studio login + generator | `js/contractStudio.js` (`GET /studio`, `POST /studio/login`) |
 
 ## Preserve notes
 - Keep root `index.html` so GitHub Pages continues to work.
 - Keep `server.js` at repo root for Render `npm start`.
 - Do not commit `.env`, `contracts/`, or `nodejs.msi`. Chat uses `GEMINI_API_KEY` on Render; never put the key in frontend JS.
-- Client agreement studio: `Ctrl+Shift+A` or chat “contract” / “agreement” / “kontrata” opens `/studio` (password still required). Print / PDF fills `templates/Agreement.pdf`. Jhon emails the filled file.
+- Client agreement studio: `Ctrl+Shift+A` or chat “contract” / “agreement” / “kontrata” opens `/studio` (password still required). Login is a split-shell card (`loginPage()` in `js/contractStudio.js`); the form is the 3-column generator. Print / PDF fills `templates/Agreement.pdf`. Jhon emails the filled file.
 - CORS must allow `elopre.dev`, `www.elopre.dev`, and `eloprejhon713.github.io` so Pages can call Render.
 - Mobile: real phone width must work; no “Desktop site” workaround.
 - Contact phone field: exactly 11 digits.

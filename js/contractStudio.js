@@ -213,20 +213,128 @@ ${extraHead || ""}
 }
 
 function loginPage(error) {
-  return shell("Contract studio - elopre.dev", `
-    <div class="brand noprint"><img src="/assets/images/brand/logonobg.png" alt="">elopre<em style="color:#2563eb;font-style:normal">.dev</em></div>
-    <div class="card">
+  const errMsg = error ? "Incorrect password. Please try again." : "";
+  const warn = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Contract studio</title>
+<link rel="icon" type="image/png" href="/assets/images/brand/icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff;--card:#fff;--field:#f7fafd;--text:#223548;--muted:#62778b;--border:#d4e0ea;
+  --primary:#2563eb;--primary-d:#1e3a8a;--primary-l:#3b82f6;--tint:#dbeafe;--accent:#d97a45;--accent-w:#fcf5ee;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Outfit,system-ui,sans-serif;display:grid;place-items:center;padding:20px}
+.shell{width:100%;max-width:880px;display:grid;grid-template-columns:1fr 1.1fr;background:var(--card);border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:0 20px 50px rgba(34,53,72,.12)}
+.side{position:relative;padding:40px;color:var(--text);background:linear-gradient(160deg,var(--tint) 0%,var(--card) 100%);border-right:1px solid var(--border);display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center;gap:28px;overflow:hidden}
+.side::before,.side::after{content:"";position:absolute;border-radius:50%;background:color-mix(in srgb,var(--primary) 10%,transparent)}
+.side::before{width:260px;height:260px;right:-90px;top:-90px}
+.side::after{width:180px;height:180px;left:-60px;bottom:-60px;background:color-mix(in srgb,var(--accent) 16%,transparent)}
+.side>*{position:relative;z-index:1}
+.logo{width:100%;display:flex;justify-content:center;padding-top:8px}
+.logo img{display:block;width:min(100%,250px);height:auto;filter:drop-shadow(0 12px 18px rgba(30,58,138,.22))}
+.side h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;margin:0 0 10px;color:var(--text)}
+.side p{margin:0;color:var(--muted);font-size:15px}
+.points{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:13.5px;color:var(--text);text-align:left}
+.points li{display:flex;gap:10px;align-items:center}
+.points svg{flex:none;color:var(--primary);background:var(--tint);border-radius:50%;padding:3px;width:20px;height:20px}
+.main{padding:44px 40px;display:flex;flex-direction:column;justify-content:center}
+.badge{align-self:flex-start;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);background:var(--accent-w);padding:5px 11px;border-radius:99px;margin-bottom:16px}
+.main h2{font-size:24px;letter-spacing:-.02em;margin:0 0 4px}
+.sub{color:var(--muted);margin:0 0 26px;font-size:14px}
+label{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.02em;margin-bottom:6px}
+.pw{position:relative}
+.pw input{width:100%;font:inherit;color:var(--text);background:var(--field);border:1px solid var(--border);border-radius:12px;padding:13px 48px 13px 44px;outline:none;transition:border-color .15s,box-shadow .15s}
+.pw input:focus{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in srgb,var(--primary) 20%,transparent)}
+.pw.err input{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.pw .ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;display:flex}
+.pw .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.pw .eye:hover{background:var(--tint);color:var(--primary)}
+.msg{min-height:20px;margin:7px 0 14px;font-size:13px;color:var(--accent);display:flex;align-items:center;gap:6px}
+.btn{width:100%;font:inherit;font-weight:600;border:0;border-radius:12px;padding:13px 18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s;text-decoration:none}
+.btn.p{background:var(--primary);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--primary) 30%,transparent)}
+.btn.p:hover{background:var(--primary-d);transform:translateY(-1px)}
+.btn.p:disabled{opacity:.7;cursor:progress;transform:none}
+.btn.g{background:transparent;color:var(--text);border:1px solid var(--border)}
+.btn.g:hover{border-color:var(--primary);color:var(--primary);background:var(--tint)}
+.or{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;margin:16px 0}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--border)}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:s .7s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+@media (max-width:760px){.shell{grid-template-columns:1fr}.side{padding:28px;gap:20px}.points{display:none}.main{padding:30px 24px}}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="logo"><img src="/assets/images/brand/logonobg.png" alt="elopre.dev logo"></div>
+    <div>
       <h1>Contract studio</h1>
-      <p class="sub">Private. Clients do not see this page.</p>
-      ${error ? `<div class="err">${esc(error)}</div>` : ""}
-      <form method="post" action="/studio/login">
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" required autofocus autocomplete="current-password">
-        <div class="actions">
-          <button class="primary" type="submit">Open studio</button>
-        </div>
-      </form>
-    </div>`);
+      <p>Create and send client agreements in minutes.</p>
+    </div>
+    <ul class="points">
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Generate agreements fast</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Export to PDF or Markdown</li>
+      <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Private, owner-only access</li>
+    </ul>
+  </aside>
+  <main class="main">
+    <span class="badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Private</span>
+    <h2>Welcome back</h2>
+    <p class="sub">Private. Clients do not see this page.</p>
+    <form id="login" method="post" action="/studio/login" novalidate>
+      <label for="pw">Password</label>
+      <div class="pw${errMsg ? " err shake" : ""}" id="box">
+        <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3M14 9l2 2"/></svg></span>
+        <input id="pw" name="password" type="password" autocomplete="current-password" placeholder="Enter your password" autofocus>
+        <button type="button" class="eye" id="eye" aria-label="Show password">
+          <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <div class="msg" id="msg" role="alert" aria-live="polite">${errMsg ? warn + errMsg : ""}</div>
+      <button class="btn p" id="go" type="submit"><span id="goText">Open studio</span></button>
+    </form>
+    <div class="or">or</div>
+    <a class="btn g" id="back" href="https://elopre.dev">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to portfolio
+    </a>
+  </main>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const warn='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>';
+function fail(text){
+  $('box').classList.add('err');$('msg').innerHTML=warn+text;
+  const b=$('box');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');
+}
+$('pw').addEventListener('input',()=>{$('box').classList.remove('err');$('msg').textContent=''});
+$('eye').onclick=()=>{
+  const show=$('pw').type==='password';
+  $('pw').type=show?'text':'password';
+  $('eye').setAttribute('aria-label',show?'Hide password':'Show password');
+  $('eyeIcon').innerHTML=show
+    ?'<path d="M17.9 17.9A10.1 10.1 0 0 1 12 19c-6.5 0-10-7-10-7a18 18 0 0 1 4.1-5M9.9 5.2A9.7 9.7 0 0 1 12 5c6.5 0 10 7 10 7a18 18 0 0 1-2.2 3.2M1 1l22 22"/>'
+    :'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+};
+$('login').addEventListener('submit',e=>{
+  const v=$('pw').value;
+  if(!v.trim()){e.preventDefault();fail('Please enter your password.');$('pw').focus();return}
+  $('go').disabled=true;$('go').innerHTML='<span class="spin"></span><span>Checking…</span>';
+});
+</script>
+</body>
+</html>`;
 }
 
 function formPage() {
