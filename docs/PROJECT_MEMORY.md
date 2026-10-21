@@ -23,7 +23,7 @@
     images/brand/            # logo, icon, logonobg
     images/projects/         # project covers
     images/profile/          # photo / avatar assets
-    documents/               # resume PDF (public)
+    documents/               # resume PDF (public). Agreement.pdf is private / gitignored.
     videos/
   contracts/                 # client agreements — local only, gitignored
   server.js                  # contact API + static hosting
@@ -43,7 +43,7 @@
 - Keep root `index.html` so GitHub Pages continues to work.
 - Keep `server.js` at repo root for Render `npm start`.
 - Do not commit `.env`, `contracts/`, or `nodejs.msi`. Chat uses `GEMINI_API_KEY` on Render; never put the key in frontend JS.
-- Client agreement studio: `Ctrl+Shift+A` opens Render `/studio` (`CONTRACT_PASS`). Preview / PDF uses `js/agreementPrint.js` (site palette). No public button. `/contracts` is blocked. Jhon emails the file.
+- Client agreement studio: `Ctrl+Shift+A` opens Render `/studio` (`CONTRACT_PASS`). Preview / PDF matches the 2-page Agreement.pdf wording (10 clauses + project boxes). Blank PDF is gitignored — do not publish it. Jhon emails the filled file.
 - CORS must allow `elopre.dev`, `www.elopre.dev`, and `eloprejhon713.github.io` so Pages can call Render.
 - Mobile: real phone width must work; no “Desktop site” workaround.
 - Contact phone field: exactly 11 digits.

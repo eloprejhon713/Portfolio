@@ -1,6 +1,7 @@
 node_modules/
 .env
 contracts/
+assets/documents/Agreement.pdf
 nodejs.msi
 *.msi
 .DS_Store

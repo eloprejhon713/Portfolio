@@ -1,5 +1,5 @@
-/**
- * Private contract studio — served only by Express after CONTRACT_PASS.
+﻿/**
+ * Private contract studio â€” served only by Express after CONTRACT_PASS.
  * Do not link this from index.html or GitHub Pages.
  */
 
@@ -66,7 +66,7 @@ function esc(value) {
 
 function dash(value, fallback) {
   const text = String(value || "").trim();
-  return text || fallback || "—";
+  return text || fallback || "â€”";
 }
 
 function slug(value) {
@@ -75,10 +75,6 @@ function slug(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 40) || "client";
-}
-
-function ticks(selected) {
-  return SERVICES.map((name) => `- [${selected.includes(name) ? "x" : " "}] ${name}`).join("\n");
 }
 
 function buildAgreement(body) {
@@ -92,284 +88,82 @@ function buildAgreement(body) {
     .split(/\r?\n/)
     .map((line) => line.trim())
     .filter(Boolean);
-  const featureList = features.length
-    ? features.map((line, i) => `  ${i + 1}. ${line}`).join("\n")
-    : "  1. …";
   const deliverables = Array.isArray(body.deliverables)
     ? body.deliverables
     : body.deliverables
       ? [body.deliverables]
       : [];
-  const total = dash(body.feeTotal, "[amount]");
-  const revisions = dash(body.revisions, "2");
-  const hourly = dash(body.hourlyRate, "____");
-  const venue = dash(body.venue, "Taguig City / Muntinlupa City / as agreed");
-  const portfolio = body.portfolio === "confidential"
-    ? "- [ ] Developer may show this project on elopre.dev / GitHub\n- [x] Confidential — no public case study"
-    : "- [x] Developer may show this project on elopre.dev / GitHub\n- [ ] Confidential — no public case study";
+  const total = dash(body.feeTotal, "[Amount]");
+  const venue = dash(body.venue, "[Agreed City]");
+  const privacy = body.portfolio === "confidential"
+    ? "Confidential â€” no public case study"
+    : "May show on elopre.dev / GitHub";
 
   return `# SOFTWARE DEVELOPMENT SERVICES AGREEMENT
 
-**This Agreement** is entered into as of **${dash(body.effectiveDate, "[Date]")}** (“Effective Date”)
+This Software Development Services Agreement (â€œAgreementâ€) is entered into on **${dash(body.effectiveDate, "[Effective Date]")}** by and between **Jhon Elopre**, doing business as **elopre.dev** (â€œDeveloperâ€; email: eloprepotchy@gmail.com) and **${dash(body.clientName, "[Clientâ€™s Full Legal Name / Company]")}** (â€œClientâ€; address: ${dash(body.clientAddress, "[Address]")}; email: ${dash(body.clientEmail, "[Email]")}; representative, if applicable: ${dash([body.clientRep, body.clientTitle].filter(Boolean).join(", "), "[Name and Title]")}). The Developer and Client are collectively referred to as the â€œParties.â€
 
-**BETWEEN:**
+## Project details
 
-**Jhon Elopre**, an independent software developer doing business as **elopre.dev**, with email **eloprepotchy@gmail.com** (“Developer”)
+- **Project & dates:** ${dash(body.projectName, "[Project]")} Â· Start ${dash(body.effectiveDate, "[date]")} Â· Handover ${dash(body.handoverDate, "[date]")}
+- **Services & platforms:** ${picked.join(", ") || "â€”"} Â· ${dash(body.platforms, "[platforms]")}
+- **Scope:** ${features.join("; ") || "â€”"}
+- **Deliverables:** ${[
+    deliverables.includes("source") && "Source code",
+    deliverables.includes("deploy") && "Deployment",
+    deliverables.includes("readme") && "README",
+  ].filter(Boolean).join(", ") || "â€”"}
+- **Out of scope:** ${dash(body.outOfScope, "â€”")}
+- **Fees:** PHP ${total} Â· 50% on signing / 25% prototype / 25% handover
+- **Revisions:** ${dash(body.revisions, "2")} rounds Â· Extra PHP ${dash(body.hourlyRate, "[rate]")} / hour
+- **Privacy:** ${privacy}
+- **Venue:** ${venue}, Philippines
 
-**AND:**
+## 1. Services and project scope
 
-**${dash(body.clientName, "[Client full legal name / company]")}**, with address **${dash(body.clientAddress, "[address]")}**, email **${dash(body.clientEmail, "[email]")}**, represented by **${dash(body.clientRep, "[name / title]")}** (“Client”)
+The Developer shall design, develop, test, and deliver the software described in the Project Details above (â€œProjectâ€). Only the features, platforms, and deliverables expressly listed are included in the project fee. Any additional feature, integration, platform, or material change requires written approval of the additional fee and revised timeline.
 
-Developer and Client are each a “Party” and together the “Parties.”
+## 2. Responsibilities and timeline
 
-This is a working template, not legal advice. For a large or long project, have a Philippine lawyer review it.
+The Developer shall perform the agreed services with reasonable professional care and provide progress updates at agreed milestones. The Client shall provide accurate requirements, content, access, feedback, approvals, and payments on time. Target dates are estimates and may be extended due to Client delays, approved changes, third-party delays, or events beyond reasonable control. The Developer may pause affected work after written notice if required information or payment is missing.
 
----
+## 3. Fees and payment
 
-## 1. Purpose
+The total project fee is PHP ${total}, payable as specified above. Unless otherwise agreed in writing, payment is 50% upon signing, 25% at the agreed prototype/staging milestone, and 25% before final handover. Work begins after the initial payment clears. If payment is more than seven (7) calendar days overdue, the Developer may pause work after written notice and charge interest of 2% per month or the maximum lawful rate, whichever is lower. The Client shall pay hosting, domains, licenses, paid APIs, app-store fees, and other third-party costs unless expressly included.
 
-Client engages Developer to design, develop, and deliver software as described in **Schedule A (Statement of Work)**, under one or more of the Developer’s services:
+## 4. Changes and revisions
 
-| Service | Typical work |
-|---|---|
-| **Web Development** | Responsive web applications — frontend, backend, and integrations |
-| **Mobile Development** | Cross-platform mobile apps (e.g. Flutter) with API / device integration |
-| **Desktop Development** | Desktop software for Windows, macOS, and/or Linux |
-| **Algorithm Design** | Algorithms, data structures, performance tuning, and complex logic |
+The included revision rounds and rate for additional work shall be recorded above. New features or changes to approved requirements are additional work. The Developer shall begin additional work only after the Client approves the added fee and timeline in writing, including by email.
 
-Only the service(s) ticked in Schedule A are included. Work outside Schedule A needs a written change order (Section 7).
+## 5. Review and acceptance
 
----
+The Client shall have seven (7) calendar days after delivery to report in writing any reproducible issue that materially fails to meet the agreed requirements. A deliverable is accepted upon written approval, production use (excluding testing), or no defect report within the review period after notice that review has started. Acceptance does not remove warranty rights.
 
-## 2. Term
+## 6. Intellectual property
 
-This Agreement starts on the Effective Date and ends when (a) all deliverables in Schedule A are accepted, and (b) final payment is received — unless ended earlier under Section 13.
+Upon full payment, the Developer assigns to the Client the transferable rights in custom work created specifically for the Project. Until full payment, that work remains with the Developer, subject to applicable law. The Developer retains ownership of pre-existing code, reusable tools, templates, libraries, and general know-how, and grants the Client a license to use Developer-owned components included in the delivered software as needed to operate it. Third-party and open-source components remain subject to their respective licenses.
 
----
+## 7. Limited warranty and support
 
-## 3. Developer’s duties
+For thirty (30) calendar days after final acceptance, the Developer shall correct reproducible bugs that materially prevent the software from meeting the agreed requirements, at no additional development fee. The warranty excludes new features, misuse, unauthorized modifications, third-party outages or changes, and issues caused by systems outside the Developerâ€™s control. Maintenance and support after the warranty period require a separate agreement.
 
-Developer shall:
+## 8. Confidentiality and data protection
 
-1. Perform the work in Schedule A in a professional manner.
-2. Use reasonable skill consistent with a software developer of similar experience.
-3. Keep Client informed of progress at the milestones in Schedule A.
-4. Deliver source code, build instructions, and agreed credentials at handover.
-5. Fix defects reported during the warranty period (Section 10) that are within scope.
+Each Party shall protect the other Partyâ€™s non-public business, technical, and personal information and use it only for the Project. This obligation continues for two (2) years after termination; trade secrets and credentials remain protected as required by law. Both Parties shall comply with applicable Philippine data-protection laws. Unless otherwise agreed, the Client is responsible for production data, backups, account security, and business compliance.
 
-Developer does **not** promise specific business results (sales, downloads, rankings, or user growth).
+## 9. Liability
 
----
+To the maximum extent permitted by law, the Developerâ€™s total liability under this Agreement shall not exceed the project fees actually paid by the Client. Neither Party shall be liable for indirect or consequential losses, except where liability cannot lawfully be limited, including fraud or willful misconduct.
 
-## 4. Client’s duties
+## 10. Termination and general terms
 
-Client shall:
+Either Party may terminate for a material breach not remedied within fourteen (14) calendar days after written notice. The Client may cancel by written notice and shall pay for completed work, reasonable work in progress, and approved non-cancellable costs; amounts already paid shall be credited against sums due. The Developer may suspend or terminate if payment is more than fourteen (14) days overdue or essential Client materials remain unavailable after written reminder. Fully paid deliverables shall be handed over; unpaid work need not be transferred. The Parties are independent contractors. This Agreement and the Project Details above are the entire agreement; changes must be approved in writing. Philippine law governs. Disputes are subject to applicable jurisdiction and venue rules in ${venue}, Philippines. Electronic signatures may be used where permitted by law.
 
-1. Give requirements, content, logos, copy, accounts, and decisions on time.
-2. Name one contact who can approve work.
-3. Pay invoices on the dates in Schedule A.
-4. Provide access (hosting, app stores, APIs, domains, databases) when needed.
-5. Test deliverables within the review period in Section 8.
+By signing below, the Parties confirm they have read, understood, and accepted this Agreement and the completed Project Details.
 
-Delay by Client (late content, late feedback, late payment) extends the timeline by at least the same number of days, and may pause work.
+**Developer:** Jhon Elopre / elopre.dev Â· Signature ______________ Date ____________
 
----
-
-## 5. Fees and payment
-
-1. **Total fee:** **PHP ${total}** (or as broken down in Schedule A).
-2. **Payment schedule** (default if Schedule A is silent):
-   - **50%** deposit — due on signing; work starts after cleared funds.
-   - **25%** — due on working prototype / staging.
-   - **25%** — due on delivery, before final handover of source / live access.
-3. Fees are in **Philippine Peso** unless Schedule A says otherwise.
-4. Late payment of more than **7 days**: Developer may pause work and charge **2% per month** on the unpaid amount, or the maximum allowed by law, whichever is less.
-5. Deposit is **non-refundable** once work has started, except if Developer cancels without cause.
-6. Third-party costs (hosting, domains, app store fees, SMS, maps, paid APIs, SSL, licenses) are **Client’s** unless Schedule A says Developer will buy them and bill at cost.
-
----
-
-## 6. Timeline
-
-Target dates are in Schedule A. They are estimates, not guarantees. They move if:
-
-- Client changes scope;
-- Client is late with materials or approval;
-- A third-party service (host, store, API) is delayed; or
-- Force majeure (Section 15).
-
----
-
-## 7. Changes and extra work
-
-A **Change Request** is anything not listed in Schedule A, including new screens, new platforms, new integrations, extra revisions beyond the agreed number, or a change in approved design.
-
-1. Client sends the request in writing (email is enough).
-2. Developer replies with effect on **fee, timeline, and scope**.
-3. Work on that change starts only after Client confirms in writing (and pays any extra deposit if required).
-
-Silence or “please just add it” in chat is not approval of extra fee.
-
-**Included revisions:** **${revisions}** rounds of reasonable revisions on already-delivered items in a milestone. After that, hourly or a fixed add-on applies: **PHP ${hourly} / hour** or a quoted lump sum.
-
----
-
-## 8. Review and acceptance
-
-1. After each milestone (or final delivery), Client has **7 calendar days** to review and list written defects (something that does not match Schedule A).
-2. If Client does not respond in 7 days, that milestone is **deemed accepted**.
-3. Cosmetic taste (“make it pop,” “I imagined it differently”) after approval of a design/wireframe is a Change Request, not a defect.
-4. Developer will fix in-scope defects within a reasonable time, then the 7-day clock runs again for those fixes only.
-
----
-
-## 9. Intellectual property
-
-1. **Before full payment:** all work product (code, designs made for this project, documentation) stays with the **Developer**.
-2. **After full payment:** Developer assigns to Client the rights in the **custom work created specifically for this project**, so Client may use, modify, and run it for their business.
-3. Developer keeps rights in:
-   - pre-existing tools, snippets, templates, and know-how;
-   - generic components reused across projects;
-   - Developer’s portfolio right to show the work (unless Client asks in writing for confidentiality).
-4. Client warrants that materials they give (logo, text, photos, data) are theirs to use. Client will cover Developer if a third party claims those materials infringe their rights.
-5. Open-source and third-party libraries stay under **their own licenses**. Developer will note major ones at handover. Client is responsible for complying with those licenses after handover.
-
----
-
-## 10. Warranty
-
-For **30 days** after final acceptance, Developer will fix, at no extra fee, bugs that:
-
-- exist in the delivered, in-scope software; and
-- are reproducible; and
-- are not caused by Client changes, new hosting, new OS/store rules, or third-party APIs.
-
-This warranty does **not** cover new features, content updates, or “it should also do X.”
-
-After 30 days, support is a new paid engagement.
-
-**No other warranty.** Software is delivered “as is” except for this section. Developer does not warrant uninterrupted or error-free operation of the internet, app stores, or third-party APIs.
-
----
-
-## 11. Limitation of liability
-
-1. Developer’s total liability under this Agreement is limited to the **fees actually paid by Client** for the project.
-2. Developer is not liable for indirect or consequential loss: lost profits, lost data, business interruption, or reputation — except for fraud or willful misconduct.
-3. Client is responsible for backups, production data, and compliance (privacy, DPA, app store, industry rules) unless Schedule A expressly includes that work.
-
----
-
-## 12. Confidentiality
-
-Each Party will keep the other’s non-public business, technical, and personal information confidential, and use it only to perform this Agreement. This lasts **2 years** after the Agreement ends, and indefinitely for source code and credentials.
-
-Developer may list the project name and a short description in a portfolio unless Schedule A marks the project **Confidential / no portfolio**.
-
----
-
-## 13. Termination
-
-**By either Party, for cause:** if the other Party materially breaches and does not fix it within **14 days** after written notice.
-
-**By Client, for convenience:** Client may stop the project in writing. Client pays:
-
-- all work completed and in progress up to the stop date (at the agreed fee or hourly rate); and
-- the deposit, which remains earned if work has started.
-
-**By Developer:** if Client is more than **14 days** late on payment, or does not provide required materials after written reminder.
-
-On termination, Developer delivers work already paid for. Unpaid work is not handed over. Sections 9–12 and 16 survive.
-
----
-
-## 14. Independent contractor
-
-Developer is an **independent contractor**, not an employee, partner, or agent of Client. Developer sets their own hours and tools. This Agreement does not create employment under Philippine labor law. Developer is responsible for their own taxes.
-
----
-
-## 15. Force majeure
-
-Neither Party is liable for delay caused by events beyond reasonable control (calamity, outage, war, epidemic, government action, failure of Google/Apple/cloud providers). The affected Party must give notice. If delay lasts more than **60 days**, either Party may end the Agreement and settle payment for work done.
-
----
-
-## 16. General
-
-1. **Entire agreement.** This document plus Schedule A is the full agreement. Chat messages do not change it unless both Parties confirm the change in writing.
-2. **Amendments** must be in writing (email confirmation is enough).
-3. **Severability.** If one clause is invalid, the rest stays in force.
-4. **No waiver.** Failure to enforce a right once is not a waiver later.
-5. **Assignment.** Client may not assign this Agreement without Developer’s written consent.
-6. **Governing law.** Laws of the **Republic of the Philippines**. Venue: courts of **${venue}**.
-7. **Notices.** Email to the addresses above is enough. Deemed received the next business day.
-
----
-
-## 17. Signatures
-
-By signing, the Parties agree to this Agreement and Schedule A.
-
-| | Developer | Client |
-|---|---|---|
-| Name | Jhon Elopre | ${dash(body.clientRep || body.clientName, "[Name]")} |
-| Role | Developer, elopre.dev | ${dash(body.clientTitle, "[Title]")} |
-| Signature | _______________ | _______________ |
-| Date | _______________ | _______________ |
-
----
-
-# SCHEDULE A — Statement of Work
-
-**Project name:** ${dash(body.projectName, "[project]")}  
-**Client contact:** ${dash(body.clientRep, "[name]")}, ${dash(body.clientEmail, "[email]")}  
-**Start date:** ${dash(body.startDate, "[date]")}  **Target handover:** ${dash(body.handoverDate, "[date]")}
-
-### A. Services included (tick)
-
-${ticks(picked)}
-
-### B. What will be built (be specific)
-
-- Platforms: ${dash(body.platforms, "[Web / Android / iOS / Windows / macOS / Linux]")}
-- Main features (list):
-${featureList}
-- Out of scope:  
-  ${dash(body.outOfScope, "content writing, app store accounts, paid ads, SEO ranking, 24/7 hosting support, future modules")}
-
-### C. Deliverables
-
-- [${deliverables.includes("source") ? "x" : " "}] Source code (Git repo or ZIP)
-- [${deliverables.includes("deploy") ? "x" : " "}] Staging / production deployment as agreed
-- [${deliverables.includes("readme") ? "x" : " "}] Basic admin or README (how to run / build)
-- [${deliverables.includes("other") ? "x" : " "}] ${dash(body.otherDeliverable, "Others: Figma, APK/AAB, installer, API docs")}
-
-### D. Tech (if already agreed)
-
-${dash(body.tech, "Developer chooses a reasonable stack.")}
-
-### E. Milestones and fees
-
-| Milestone | What’s due | Date | Amount (PHP) |
-|---|---|---|---|
-| 1. Deposit / kickoff | Agreement signed, requirements locked | ${dash(body.effectiveDate)} | ${dash(body.feeDeposit)} |
-| 2. Prototype / design approval | | ${dash(body.midDate)} | ${dash(body.feeMid)} |
-| 3. Feature-complete staging | | ${dash(body.stageDate)} | ${dash(body.feeStage)} |
-| 4. Final acceptance + handover | | ${dash(body.handoverDate)} | ${dash(body.feeFinal)} |
-| **Total** | | | **${total}** |
-
-**Revision rounds included:** ${revisions}  
-**Extra work rate:** PHP ${hourly} / hour
-
-### F. Hosting & accounts
-
-Client provides: ${dash(body.clientProvides, "domain, hosting, store / cloud accounts as needed")}  
-Developer provides: ${dash(body.devProvides, "local/dev environment only, unless listed")}
-
-### G. Portfolio
-
-${portfolio}
+**Client:** ${dash(body.clientName, "[Client name / company]")} Â· Signature ______________ Date ____________
 `.trim() + "\n";
 }
 
@@ -418,7 +212,7 @@ ${extraHead || ""}
 }
 
 function loginPage(error) {
-  return shell("Contract studio — elopre.dev", `
+  return shell("Contract studio â€” elopre.dev", `
     <div class="brand noprint"><img src="/assets/images/brand/logonobg.png" alt="">elopre<em style="color:#2563eb;font-style:normal">.dev</em></div>
     <div class="card">
       <h1>Contract studio</h1>
@@ -438,7 +232,7 @@ function formPage() {
   const serviceBoxes = SERVICES.map((name) =>
     `<label><input type="checkbox" name="services" value="${esc(name)}"> ${esc(name)}</label>`
   ).join("");
-  return shell("New agreement — elopre.dev", `
+  return shell("New agreement â€” elopre.dev", `
     <div class="brand noprint"><img src="/assets/images/brand/logonobg.png" alt="">elopre<em style="color:#2563eb;font-style:normal">.dev</em></div>
     <div class="card">
       <h1>Generate agreement</h1>
