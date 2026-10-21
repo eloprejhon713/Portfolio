@@ -271,6 +271,14 @@
     return "https://portfolio-1-f9t6.onrender.com";
   })();
 
+  function wantsContractStudio(text) {
+    return /\b(contract|agreement|kontrata|studio)\b/i.test(String(text || ""));
+  }
+
+  function openContractStudio() {
+    window.location.href = `${API_BASE}/studio`;
+  }
+
   document.addEventListener("keydown", (e) => {
     if (!(e.ctrlKey || e.metaKey) || !e.shiftKey) return;
     if (e.key !== "A" && e.key !== "a") return;
@@ -564,6 +572,17 @@
 
     appendMessage('user', userText);
     chatHistory.push({ role: 'user', content: userText });
+
+    if (wantsContractStudio(userText)) {
+      showTyping();
+      await wait(400);
+      hideTyping();
+      const reply = "Opening the contract studio...";
+      chatHistory.push({ role: 'assistant', content: reply });
+      appendMessage('bot', reply);
+      openContractStudio();
+      return;
+    }
 
     showTyping();
 
