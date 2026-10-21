@@ -522,7 +522,7 @@ refresh();
 }
 
 function filenameFor(body, ext) {
-  return `Elopre-Agreement-${slug(body.clientName)}-${slug(body.projectName)}.${ext}`;
+  return `${slug(body.clientName)}-agreement.${ext}`;
 }
 
 function noindex(res) {

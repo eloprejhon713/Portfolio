@@ -49,7 +49,7 @@
 - Keep root `index.html` so GitHub Pages continues to work.
 - Keep `server.js` at repo root for Render `npm start`.
 - Do not commit `.env`, `contracts/`, or `nodejs.msi`. Chat uses `GEMINI_API_KEY` on Render; never put the key in frontend JS.
-- Client agreement studio: `Ctrl+Shift+A` or chat “contract” / “agreement” / “kontrata” opens `/studio` (password still required). Login is a split-shell card (`loginPage()` in `js/contractStudio.js`); Back to portfolio goes to `/` on the same host. The form is the 3-column generator. Print / PDF fills `templates/Agreement.pdf` via `scripts/fill_agreement.py` (PyMuPDF). Writes one fitted line in each white Project Details cell so text does not spill onto the navy headers. pdf-lib in `js/fillAgreementPdf.js` is the fallback. Jhon emails the filled file.
+- Client agreement studio: `Ctrl+Shift+A` or chat “contract” / “agreement” / “kontrata” opens `/studio` (password still required). Login is a split-shell card (`loginPage()` in `js/contractStudio.js`); Back to portfolio goes to `/` on the same host. The form is the 3-column generator. Print / PDF fills `templates/Agreement.pdf` via `scripts/fill_agreement.py` (PyMuPDF). Downloaded PDF is `{client-name}-agreement.pdf`. Writes one fitted line in each white Project Details cell so text does not spill onto the navy headers. pdf-lib in `js/fillAgreementPdf.js` is the fallback. Jhon emails the filled file.
 - CORS must allow `elopre.dev`, `www.elopre.dev`, and `eloprejhon713.github.io` so Pages can call Render.
 - Mobile: real phone width must work; no “Desktop site” workaround.
 - Contact phone field: exactly 11 digits.
