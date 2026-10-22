@@ -101,20 +101,106 @@ function icsEscape(value) {
     .replace(/;/g, "\\;");
 }
 
-function buildCallInvite({ ownerEmail, fullName, email, phone, service, message, callDate, callTime }) {
+function digitsOnly(value) {
+  return String(value || "").replace(/\D/g, "");
+}
+
+function formatPhPhone(value) {
+  const digits = digitsOnly(value);
+  if (digits.length === 11 && digits.startsWith("0")) {
+    return `${digits.slice(0, 4)} ${digits.slice(4, 7)} ${digits.slice(7)}`;
+  }
+  if (digits.length === 12 && digits.startsWith("63")) {
+    return `0${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
+  }
+  return toSafeString(value) || digits;
+}
+
+function whatsappHref(value) {
+  const digits = digitsOnly(value);
+  let intl = digits;
+  if (digits.length === 11 && digits.startsWith("0")) intl = `63${digits.slice(1)}`;
+  else if (digits.length === 10) intl = `63${digits}`;
+  return intl ? `https://wa.me/${intl}` : "";
+}
+
+function callEventTitle(fullName, service) {
+  return `Discovery Call — ${fullName} · ${service}`;
+}
+
+function callEventLocation(phone) {
+  return `Phone / WhatsApp: ${formatPhPhone(phone)}`;
+}
+
+function callEventCopy({ fullName, email, phone, service, company, budget, timeline, message }) {
+  const phoneDisplay = formatPhPhone(phone);
+  const wa = whatsappHref(phone);
+  const clientRows = [
+    ["👤", "Name", fullName],
+    ["✉️", "Email", email],
+    ["📱", "Phone", phoneDisplay],
+  ];
+  if (company) clientRows.push(["🏢", "Company", company]);
+  const projectRows = [["🛠️", "Service", service]];
+  if (budget) projectRows.push(["💰", "Budget", budget]);
+  if (timeline) projectRows.push(["⏱️", "Timeline", timeline]);
+
+  const text = [
+    "📞 Inquiry call · booked from elopre.dev",
+    "",
+    "CLIENT",
+    ...clientRows.map(([icon, label, value]) => `${icon} ${label}: ${value}`),
+    "",
+    "PROJECT",
+    ...projectRows.map(([icon, label, value]) => `${icon} ${label}: ${value}`),
+    message ? "" : null,
+    message ? "MESSAGE" : null,
+    message || null,
+    "",
+    "QUICK ACTIONS",
+    `Reply by email: ${email}`,
+    wa ? `Message on WhatsApp: ${wa}` : null,
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+
+  const htmlParts = [
+    `<b>📞 Inquiry call · booked from <a href="https://elopre.dev">elopre.dev</a></b>`,
+    "",
+    "CLIENT",
+    ...clientRows.map(([icon, label, value]) => {
+      if (label === "Email") {
+        return `${icon} <b>${label}:</b> <a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`;
+      }
+      if (label === "Phone") {
+        return `${icon} <b>${label}:</b> <a href="tel:${digitsOnly(phone)}">${escapeHtml(phoneDisplay)}</a>`;
+      }
+      return `${icon} <b>${label}:</b> ${escapeHtml(value)}`;
+    }),
+    "",
+    "PROJECT",
+    ...projectRows.map(([icon, label, value]) => `${icon} <b>${label}:</b> ${escapeHtml(value)}`),
+  ];
+  if (message) {
+    htmlParts.push("", "MESSAGE", `<i>${escapeHtml(message).replace(/\n/g, "<br>")}</i>`);
+  }
+  const actions = [`<a href="mailto:${escapeHtml(email)}">Reply by email</a>`];
+  if (wa) actions.push(`<a href="${wa}">Message on WhatsApp</a>`);
+  htmlParts.push("", "QUICK ACTIONS", actions.join(" · "));
+
+  return {
+    title: callEventTitle(fullName, service),
+    location: callEventLocation(phone),
+    text,
+    html: htmlParts.join("<br>"),
+  };
+}
+
+function buildCallInvite({ ownerEmail, fullName, email, phone, service, company, budget, timeline, message, callDate, callTime }) {
   const window = manilaCallWindow(callDate, callTime);
   if (!window) return null;
   const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}@elopre.dev`;
-  const summary = `Call with ${fullName} — ${service}`;
-  const desc = [
-    "Inquiry call booked from elopre.dev",
-    `Client: ${fullName}`,
-    `Email: ${email}`,
-    `Phone: ${phone}`,
-    `Service: ${service}`,
-    "",
-    message,
-  ].join("\n");
+  const copy = callEventCopy({ fullName, email, phone, service, company, budget, timeline, message });
   const ics = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -126,12 +212,12 @@ function buildCallInvite({ ownerEmail, fullName, email, phone, service, message,
     `DTSTAMP:${icsUtc(new Date())}`,
     `DTSTART:${icsUtc(window.start)}`,
     `DTEND:${icsUtc(window.end)}`,
-    `SUMMARY:${icsEscape(summary)}`,
-    `DESCRIPTION:${icsEscape(desc)}`,
+    `SUMMARY:${icsEscape(copy.title)}`,
+    `DESCRIPTION:${icsEscape(copy.text)}`,
     `ORGANIZER;CN=Jhon Elopre:mailto:${ownerEmail}`,
     `ATTENDEE;CN=${icsEscape(fullName)};RSVP=TRUE:mailto:${email}`,
     `ATTENDEE;CN=Jhon Elopre;PARTSTAT=ACCEPTED:mailto:${ownerEmail}`,
-    "LOCATION:Phone / WhatsApp +63 936 988 1562",
+    `LOCATION:${icsEscape(copy.location)}`,
     "STATUS:CONFIRMED",
     "SEQUENCE:0",
     "END:VEVENT",
@@ -193,31 +279,33 @@ async function insertGoogleCalendarEvent({
   if (!calendarId || !auth || !start || !end) return { skipped: true };
 
   const calendar = google.calendar({ version: "v3", auth });
-  const description = [
-    "Inquiry call booked from elopre.dev",
-    `Client: ${fullName}`,
-    `Email: ${email}`,
-    `Phone: ${phone}`,
-    `Service: ${service}`,
-    company ? `Company: ${company}` : "",
-    budget ? `Budget: ${budget}` : "",
-    timeline ? `Timeline: ${timeline}` : "",
-    "",
+  const copy = callEventCopy({
+    fullName,
+    email,
+    phone,
+    service,
+    company,
+    budget,
+    timeline,
     message,
-  ]
-    .filter((line, index, lines) => line || lines[index - 1])
-    .join("\n");
+  });
 
   const { data } = await calendar.events.insert({
     calendarId,
     sendUpdates: "none",
     requestBody: {
-      summary: `Call with ${fullName} — ${service}`,
-      description,
+      summary: copy.title,
+      description: copy.html,
       start,
       end,
-      location: "Phone / WhatsApp +63 936 988 1562",
-      reminders: { useDefault: true },
+      location: copy.location,
+      reminders: {
+        useDefault: false,
+        overrides: [
+          { method: "popup", minutes: 30 },
+          { method: "popup", minutes: 10 },
+        ],
+      },
     },
   });
   return { id: data.id };
@@ -353,6 +441,9 @@ app.post("/api/contact", async (req, res) => {
           email,
           phone,
           service,
+          company,
+          budget,
+          timeline,
           message,
           callDate,
           callTime,
