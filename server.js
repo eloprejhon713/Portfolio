@@ -1,4 +1,6 @@
+const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const express = require("express");
 const { google } = require("googleapis");
 const { Resend } = require("resend");
@@ -71,12 +73,20 @@ function escapeHtml(value) {
 
 const CALL_SLOTS = {
   "9:00 AM": [9, 0],
+  "9:30 AM": [9, 30],
   "10:00 AM": [10, 0],
+  "10:30 AM": [10, 30],
   "11:00 AM": [11, 0],
+  "11:30 AM": [11, 30],
   "1:00 PM": [13, 0],
+  "1:30 PM": [13, 30],
   "2:00 PM": [14, 0],
+  "2:30 PM": [14, 30],
   "3:00 PM": [15, 0],
+  "3:30 PM": [15, 30],
   "4:00 PM": [16, 0],
+  "4:30 PM": [16, 30],
+  "5:00 PM": [17, 0],
 };
 
 function manilaCallWindow(dateStr, timeLabel) {
@@ -89,16 +99,9 @@ function manilaCallWindow(dateStr, timeLabel) {
   return { start, end };
 }
 
-function icsUtc(date) {
-  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
-}
-
-function icsEscape(value) {
-  return String(value || "")
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/,/g, "\\,")
-    .replace(/;/g, "\\;");
+function callSlotLabel(callDate, callTime) {
+  if (!manilaCallWindow(callDate, callTime)) return null;
+  return { label: `${callDate} at ${callTime} (Asia/Manila, 30 min)` };
 }
 
 function digitsOnly(value) {
@@ -196,39 +199,6 @@ function callEventCopy({ fullName, email, phone, service, company, budget, timel
   };
 }
 
-function buildCallInvite({ ownerEmail, fullName, email, phone, service, company, budget, timeline, message, callDate, callTime }) {
-  const window = manilaCallWindow(callDate, callTime);
-  if (!window) return null;
-  const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}@elopre.dev`;
-  const copy = callEventCopy({ fullName, email, phone, service, company, budget, timeline, message });
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//elopre.dev//Contact//EN",
-    "CALSCALE:GREGORIAN",
-    "METHOD:REQUEST",
-    "BEGIN:VEVENT",
-    `UID:${uid}`,
-    `DTSTAMP:${icsUtc(new Date())}`,
-    `DTSTART:${icsUtc(window.start)}`,
-    `DTEND:${icsUtc(window.end)}`,
-    `SUMMARY:${icsEscape(copy.title)}`,
-    `DESCRIPTION:${icsEscape(copy.text)}`,
-    `ORGANIZER;CN=Jhon Elopre:mailto:${ownerEmail}`,
-    `ATTENDEE;CN=${icsEscape(fullName)};RSVP=TRUE:mailto:${email}`,
-    `ATTENDEE;CN=Jhon Elopre;PARTSTAT=ACCEPTED:mailto:${ownerEmail}`,
-    `LOCATION:${icsEscape(copy.location)}`,
-    "STATUS:CONFIRMED",
-    "SEQUENCE:0",
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-  return {
-    ics,
-    label: `${callDate} at ${callTime} (Asia/Manila, 30 min)`,
-  };
-}
-
 function manilaLocalDateTime(dateStr, timeLabel, extraMin = 0) {
   const hm = CALL_SLOTS[timeLabel];
   if (!hm || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
@@ -241,6 +211,84 @@ function manilaLocalDateTime(dateStr, timeLabel, extraMin = 0) {
   };
 }
 
+function eventRange(event) {
+  if (!event || event.status === "cancelled") return null;
+  if (event.start?.dateTime && event.end?.dateTime) {
+    return { start: new Date(event.start.dateTime), end: new Date(event.end.dateTime) };
+  }
+  if (event.start?.date && event.end?.date) {
+    return {
+      start: new Date(`${event.start.date}T00:00:00+08:00`),
+      end: new Date(`${event.end.date}T00:00:00+08:00`),
+    };
+  }
+  return null;
+}
+
+async function listBusyCallLabels(dateStr) {
+  const calendarId = process.env.GOOGLE_CALENDAR_ID;
+  const auth = getCalendarAuth();
+  if (!calendarId || !auth || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return [];
+
+  const calendar = google.calendar({ version: "v3", auth });
+  const { data } = await calendar.events.list({
+    calendarId,
+    timeMin: `${dateStr}T00:00:00+08:00`,
+    timeMax: `${dateStr}T23:59:59+08:00`,
+    singleEvents: true,
+    orderBy: "startTime",
+    maxResults: 50,
+  });
+
+  const events = (data.items || []).map(eventRange).filter(Boolean);
+  return Object.keys(CALL_SLOTS).filter((label) => {
+    const window = manilaCallWindow(dateStr, label);
+    if (!window) return false;
+    return events.some((event) => event.start < window.end && event.end > window.start);
+  });
+}
+
+const OAUTH_TOKEN_FILE = path.join(__dirname, "Calendar", "oauth-token.json");
+const CALENDAR_SCOPES = ["https://www.googleapis.com/auth/calendar"];
+
+function getOAuth2Client() {
+  const clientId = process.env.GOOGLE_OAUTH_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_OAUTH_CLIENT_SECRET;
+  const redirect =
+    process.env.GOOGLE_OAUTH_REDIRECT || "http://127.0.0.1:3000/api/calendar/oauth/callback";
+  if (!clientId || !clientSecret) return null;
+  return new google.auth.OAuth2(clientId, clientSecret, redirect);
+}
+
+function loadOAuthRefreshToken() {
+  if (process.env.GOOGLE_OAUTH_REFRESH_TOKEN) return process.env.GOOGLE_OAUTH_REFRESH_TOKEN;
+  try {
+    const raw = JSON.parse(fs.readFileSync(OAUTH_TOKEN_FILE, "utf8"));
+    return raw.refresh_token || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveOAuthRefreshToken(refreshToken) {
+  fs.mkdirSync(path.dirname(OAUTH_TOKEN_FILE), { recursive: true });
+  fs.writeFileSync(OAUTH_TOKEN_FILE, JSON.stringify({ refresh_token: refreshToken }, null, 2));
+  process.env.GOOGLE_OAUTH_REFRESH_TOKEN = refreshToken;
+}
+
+function getUserCalendarAuth() {
+  const oauth2 = getOAuth2Client();
+  const refresh = loadOAuthRefreshToken();
+  if (!oauth2 || !refresh) return null;
+  oauth2.setCredentials({ refresh_token: refresh });
+  return oauth2;
+}
+
+function ownerOAuthGate(req) {
+  const pass = toSafeString(req.query.pass);
+  return Boolean(pass && process.env.CONTRACT_PASS && pass === process.env.CONTRACT_PASS);
+}
+
 function getCalendarAuth() {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (raw) {
@@ -248,7 +296,7 @@ function getCalendarAuth() {
     return new google.auth.JWT({
       email: creds.client_email,
       key: String(creds.private_key || "").replace(/\\n/g, "\n"),
-      scopes: ["https://www.googleapis.com/auth/calendar"],
+      scopes: CALENDAR_SCOPES,
     });
   }
   const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
@@ -256,7 +304,7 @@ function getCalendarAuth() {
   const keyFile = path.isAbsolute(keyPath) ? keyPath : path.resolve(__dirname, keyPath);
   return new google.auth.GoogleAuth({
     keyFile,
-    scopes: ["https://www.googleapis.com/auth/calendar"],
+    scopes: CALENDAR_SCOPES,
   });
 }
 
@@ -273,10 +321,14 @@ async function insertGoogleCalendarEvent({
   callTime,
 }) {
   const calendarId = process.env.GOOGLE_CALENDAR_ID;
-  const auth = getCalendarAuth();
+  const userAuth = getUserCalendarAuth();
+  const auth = userAuth || getCalendarAuth();
   const start = manilaLocalDateTime(callDate, callTime, 0);
   const end = manilaLocalDateTime(callDate, callTime, 30);
   if (!calendarId || !auth || !start || !end) return { skipped: true };
+
+  const busy = await listBusyCallLabels(callDate);
+  if (busy.includes(callTime)) return { busy: true };
 
   const calendar = google.calendar({ version: "v3", auth });
   const copy = callEventCopy({
@@ -289,26 +341,42 @@ async function insertGoogleCalendarEvent({
     timeline,
     message,
   });
+  const useMeet = Boolean(userAuth);
+  const requestBody = {
+    summary: copy.title,
+    description: copy.html,
+    start,
+    end,
+    location: copy.location,
+    reminders: {
+      useDefault: false,
+      overrides: [
+        { method: "popup", minutes: 30 },
+        { method: "popup", minutes: 10 },
+      ],
+    },
+  };
+  if (useMeet) {
+    requestBody.attendees = [{ email }];
+    requestBody.conferenceData = {
+      createRequest: {
+        requestId: `elopre-${crypto.randomUUID()}`,
+        conferenceSolutionKey: { type: "hangoutsMeet" },
+      },
+    };
+  }
 
   const { data } = await calendar.events.insert({
     calendarId,
-    sendUpdates: "none",
-    requestBody: {
-      summary: copy.title,
-      description: copy.html,
-      start,
-      end,
-      location: copy.location,
-      reminders: {
-        useDefault: false,
-        overrides: [
-          { method: "popup", minutes: 30 },
-          { method: "popup", minutes: 10 },
-        ],
-      },
-    },
+    conferenceDataVersion: useMeet ? 1 : 0,
+    sendUpdates: useMeet ? "all" : "none",
+    requestBody,
   });
-  return { id: data.id };
+  const meetLink =
+    data.hangoutLink ||
+    data.conferenceData?.entryPoints?.find((entry) => entry.entryPointType === "video")?.uri ||
+    "";
+  return { id: data.id, meetLink };
 }
 
 // Validate input
@@ -392,6 +460,62 @@ function getFromAddress() {
   return `${fromName} <${fromEmail}>`;
 }
 
+app.get("/api/calendar/oauth", (req, res) => {
+  if (!ownerOAuthGate(req)) return res.status(404).end();
+  const oauth2 = getOAuth2Client();
+  if (!oauth2) {
+    return res.status(500).send("Add GOOGLE_OAUTH_CLIENT_SECRET to .env first.");
+  }
+  return res.redirect(
+    oauth2.generateAuthUrl({
+      access_type: "offline",
+      prompt: "consent",
+      scope: CALENDAR_SCOPES,
+    })
+  );
+});
+
+app.get("/api/calendar/oauth/callback", async (req, res) => {
+  const oauth2 = getOAuth2Client();
+  const code = toSafeString(req.query.code);
+  if (!oauth2 || !code) return res.status(400).send("Missing OAuth code.");
+  try {
+    const { tokens } = await oauth2.getToken(code);
+    if (!tokens.refresh_token) {
+      return res
+        .status(400)
+        .send(
+          "Google did not return a refresh token. Revoke elopre.dev at myaccount.google.com/permissions, then connect again."
+        );
+    }
+    saveOAuthRefreshToken(tokens.refresh_token);
+    return res
+      .type("html")
+      .send("<p>Google Calendar connected. You can close this tab.</p>");
+  } catch (error) {
+    console.error("OAuth callback failed:", error.message || error);
+    return res.status(500).send("Could not connect Google Calendar.");
+  }
+});
+
+app.get("/api/call-slots", async (req, res) => {
+  const date = toSafeString(req.query.date);
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return res.status(400).json({
+      message: "Invalid date.",
+      slots: Object.keys(CALL_SLOTS),
+      busy: [],
+    });
+  }
+  try {
+    const busy = date ? await listBusyCallLabels(date) : [];
+    return res.json({ slots: Object.keys(CALL_SLOTS), busy });
+  } catch (error) {
+    console.error("Call slots lookup failed:", error.message || error);
+    return res.json({ slots: Object.keys(CALL_SLOTS), busy: [] });
+  }
+});
+
 // Contact form route
 app.post("/api/contact", async (req, res) => {
   const validated = validateInput(req.body || {});
@@ -433,22 +557,38 @@ app.post("/api/contact", async (req, res) => {
   const logoUrl = "https://eloprejhon713.github.io/Portfolio/assets/images/brand/logonobg.png";
 
   const ownerEmail = process.env.CONTACT_TO;
-  const invite =
-    method === "call"
-      ? buildCallInvite({
-          ownerEmail,
-          fullName,
-          email,
-          phone,
-          service,
-          company,
-          budget,
-          timeline,
-          message,
-          callDate,
-          callTime,
-        })
-      : null;
+  let meetLink = "";
+  if (method === "call") {
+    try {
+      const cal = await insertGoogleCalendarEvent({
+        fullName,
+        email,
+        phone,
+        service,
+        company,
+        budget,
+        timeline,
+        message,
+        callDate,
+        callTime,
+      });
+      if (cal?.busy) {
+        return res.status(409).json({
+          message: "That time is already booked. Please pick another slot.",
+        });
+      }
+      if (cal?.id) console.log("Google Calendar event created");
+      else if (cal?.skipped) console.warn("Google Calendar skipped: missing calendar id or key");
+      meetLink = cal?.meetLink || "";
+    } catch (calErr) {
+      console.error("Google Calendar insert failed:", calErr.message || calErr);
+      return res.status(500).json({
+        message: "Unable to book that call time right now. Please try another slot or email instead.",
+      });
+    }
+  }
+
+  const invite = method === "call" ? callSlotLabel(callDate, callTime) : null;
 
   const extraLines = [
     company ? `Company: ${company}` : "",
@@ -456,6 +596,7 @@ app.post("/api/contact", async (req, res) => {
     timeline ? `Timeline: ${timeline}` : "",
     `Reach me: ${method === "call" ? "Schedule a call" : "Reply by email"}`,
     invite ? `Call: ${invite.label}` : "",
+    meetLink ? `Meet: ${meetLink}` : "",
   ]
     .filter(Boolean)
     .join("\n");
@@ -561,6 +702,7 @@ app.post("/api/contact", async (req, res) => {
                     ${budget ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"budget"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(budget)}"</span><span style="color:#64748b;">,</span></div>` : ""}
                     ${timeline ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"timeline"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(timeline)}"</span><span style="color:#64748b;">,</span></div>` : ""}
                     ${invite ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"call"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(invite.label)}"</span><span style="color:#64748b;">,</span></div>` : ""}
+                    ${meetLink ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"meet"</span><span style="color:#64748b;">:</span> <a href="${escapeHtml(meetLink)}" style="color:#16a34a;text-decoration:none;">"${escapeHtml(meetLink)}"</a><span style="color:#64748b;">,</span></div>` : ""}
                     <div style="padding-left:6px;">
                       <span style="color:#2563eb;">"interest"</span><span style="color:#64748b;">:</span>
                     </div>
@@ -644,15 +786,6 @@ app.post("/api/contact", async (req, res) => {
 </html>
   `,
 };
-  if (invite) {
-    mailOptions.attachments = [
-      {
-        filename: "elopre-call.ics",
-        content: Buffer.from(invite.ics, "utf8").toString("base64"),
-        contentType: "text/calendar; method=REQUEST; charset=UTF-8",
-      },
-    ];
-  }
 
   try {
     const { data, error } = await resend.emails.send(mailOptions);
@@ -663,24 +796,51 @@ app.post("/api/contact", async (req, res) => {
       });
     }
     console.log("Contact email sent:", data?.id || "ok");
-    if (method === "call") {
+    if (method === "call" && meetLink) {
       try {
-        const cal = await insertGoogleCalendarEvent({
-          fullName,
-          email,
-          phone,
-          service,
-          company,
-          budget,
-          timeline,
-          message,
-          callDate,
-          callTime,
+        const clientMail = await resend.emails.send({
+          from: getFromAddress(),
+          to: email,
+          replyTo: ownerEmail,
+          subject: `Your discovery call with Jhon Elopre — ${invite?.label || "scheduled"}`,
+          text: [
+            `Hi ${firstName},`,
+            "",
+            "Your discovery call is booked.",
+            invite ? `When: ${invite.label}` : "",
+            `Google Meet: ${meetLink}`,
+            "",
+            "If that time no longer works, just reply to this email.",
+            "",
+            "— Jhon Elopre",
+            "elopre.dev",
+          ]
+            .filter(Boolean)
+            .join("\n"),
+          html: `
+<!DOCTYPE html>
+<html lang="en">
+<body style="margin:0;padding:24px;background:#eef1f8;font-family:Segoe UI,Arial,sans-serif;color:#0f172a;">
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation"><tr><td align="center">
+    <table width="520" cellpadding="0" cellspacing="0" role="presentation" style="max-width:520px;width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:28px;">
+      <tr><td>
+        <p style="margin:0 0 8px;font-size:13px;color:#64748b;">elopre.dev</p>
+        <h1 style="margin:0 0 12px;font-size:22px;font-weight:600;">Your discovery call is booked</h1>
+        <p style="margin:0 0 16px;line-height:1.6;">Hi ${escapeHtml(firstName)}, your call with Jhon Elopre is on the calendar.</p>
+        ${invite ? `<p style="margin:0 0 8px;"><b>When:</b> ${escapeHtml(invite.label)}</p>` : ""}
+        <p style="margin:0 0 20px;"><b>Service:</b> ${escapeHtml(service)}</p>
+        <a href="${escapeHtml(meetLink)}" style="display:inline-block;background:#2563eb;color:#fff;text-decoration:none;font-weight:600;padding:12px 18px;border-radius:10px;">Join Google Meet</a>
+        <p style="margin:16px 0 0;font-size:13px;color:#64748b;word-break:break-all;">${escapeHtml(meetLink)}</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>`,
         });
-        if (cal?.id) console.log("Google Calendar event created");
-        else if (cal?.skipped) console.warn("Google Calendar skipped: missing calendar id or key");
-      } catch (calErr) {
-        console.error("Google Calendar insert failed:", calErr.message || calErr);
+        if (clientMail.error) console.error("Client Meet email failed:", clientMail.error);
+        else console.log("Client Meet email sent");
+      } catch (clientErr) {
+        console.error("Client Meet email failed:", clientErr.message || clientErr);
       }
     }
     return res.status(200).json({ message: "Message sent successfully." });

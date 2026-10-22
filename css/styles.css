@@ -1454,6 +1454,12 @@
   .contact-slots input:checked + span {
     background: var(--blue); border-color: var(--blue); color: #fff;
   }
+  .contact-slots input:disabled + span {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+  .contact-slots label:has(input:disabled) { cursor: not-allowed; }
   .contact-privacy {
     display: flex; gap: 12px; padding: 14px 16px; border-radius: 14px;
     background: var(--surface); color: var(--text-muted); font-size: 0.82rem;

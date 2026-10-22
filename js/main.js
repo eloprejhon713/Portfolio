@@ -413,12 +413,35 @@
 
   const callBox = document.getElementById('callBox');
   const callDate = document.getElementById('callDate');
+  const callSlots = document.getElementById('callSlots');
   const msgCount = document.getElementById('msgCount');
   const messageBox = document.getElementById('message');
   if (callDate) {
     const min = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
     callDate.min = min;
   }
+
+  async function refreshCallSlots() {
+    const radios = callSlots ? [...callSlots.querySelectorAll('input[name="callTime"]')] : [];
+    if (!radios.length) return;
+    const date = callDate?.value || '';
+    let busy = [];
+    if (date) {
+      try {
+        const response = await fetch(`${API_BASE}/api/call-slots?date=${encodeURIComponent(date)}`);
+        const data = await response.json().catch(() => ({}));
+        busy = Array.isArray(data.busy) ? data.busy : [];
+      } catch {
+        busy = [];
+      }
+    }
+    radios.forEach((radio) => {
+      const taken = busy.includes(radio.value);
+      radio.disabled = taken;
+      if (taken && radio.checked) radio.checked = false;
+    });
+  }
+  if (callDate) callDate.addEventListener('change', refreshCallSlots);
   if (messageBox && msgCount) {
     messageBox.addEventListener('input', () => {
       msgCount.textContent = String(messageBox.value.length);
@@ -429,6 +452,7 @@
       const call = document.querySelector('input[name="method"]:checked')?.value === 'call';
       if (callBox) callBox.hidden = !call;
       if (callDate) callDate.required = call;
+      if (call) refreshCallSlots();
     });
   });
 
@@ -478,7 +502,10 @@
         body: JSON.stringify(payload)
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.message || 'Failed to send message.');
+      if (!response.ok) {
+        if (response.status === 409) refreshCallSlots();
+        throw new Error(data.message || 'Failed to send message.');
+      }
       form.reset();
       if (callBox) callBox.hidden = true;
       if (msgCount) msgCount.textContent = '0';
@@ -486,7 +513,7 @@
         'success',
         method === 'call' ? 'Call requested!' : 'Message sent!',
         method === 'call'
-          ? "Thanks — the inquiry is in my inbox and the call is on my Google Calendar. I'll confirm by email."
+          ? "Thanks — the call is on my Google Calendar. Check your email for the Google Meet link."
           : "Thanks for reaching out — I'll get back to you soon."
       );
     } catch (err) {
