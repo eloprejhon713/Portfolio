@@ -226,26 +226,31 @@ function eventRange(event) {
 }
 
 async function listBusyCallLabels(dateStr) {
-  const calendarId = process.env.GOOGLE_CALENDAR_ID;
-  const auth = getCalendarAuth();
-  if (!calendarId || !auth || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return [];
+  try {
+    const calendarId = process.env.GOOGLE_CALENDAR_ID;
+    const auth = getCalendarAuth() || getUserCalendarAuth();
+    if (!calendarId || !auth || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return [];
 
-  const calendar = google.calendar({ version: "v3", auth });
-  const { data } = await calendar.events.list({
-    calendarId,
-    timeMin: `${dateStr}T00:00:00+08:00`,
-    timeMax: `${dateStr}T23:59:59+08:00`,
-    singleEvents: true,
-    orderBy: "startTime",
-    maxResults: 50,
-  });
+    const calendar = google.calendar({ version: "v3", auth });
+    const { data } = await calendar.events.list({
+      calendarId,
+      timeMin: `${dateStr}T00:00:00+08:00`,
+      timeMax: `${dateStr}T23:59:59+08:00`,
+      singleEvents: true,
+      orderBy: "startTime",
+      maxResults: 50,
+    });
 
-  const events = (data.items || []).map(eventRange).filter(Boolean);
-  return Object.keys(CALL_SLOTS).filter((label) => {
-    const window = manilaCallWindow(dateStr, label);
-    if (!window) return false;
-    return events.some((event) => event.start < window.end && event.end > window.start);
-  });
+    const events = (data.items || []).map(eventRange).filter(Boolean);
+    return Object.keys(CALL_SLOTS).filter((label) => {
+      const window = manilaCallWindow(dateStr, label);
+      if (!window) return false;
+      return events.some((event) => event.start < window.end && event.end > window.start);
+    });
+  } catch (error) {
+    console.error("Busy lookup failed:", error.message || error);
+    return [];
+  }
 }
 
 const OAUTH_TOKEN_FILE = path.join(__dirname, "Calendar", "oauth-token.json");
@@ -292,16 +297,25 @@ function ownerOAuthGate(req) {
 function getCalendarAuth() {
   const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
   if (raw) {
-    const creds = JSON.parse(raw);
-    return new google.auth.JWT({
-      email: creds.client_email,
-      key: String(creds.private_key || "").replace(/\\n/g, "\n"),
-      scopes: CALENDAR_SCOPES,
-    });
+    try {
+      const creds = JSON.parse(raw);
+      return new google.auth.JWT({
+        email: creds.client_email,
+        key: String(creds.private_key || "").replace(/\\n/g, "\n"),
+        scopes: CALENDAR_SCOPES,
+      });
+    } catch (error) {
+      console.error("Invalid GOOGLE_SERVICE_ACCOUNT_JSON:", error.message);
+      return null;
+    }
   }
   const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   if (!keyPath) return null;
   const keyFile = path.isAbsolute(keyPath) ? keyPath : path.resolve(__dirname, keyPath);
+  if (!fs.existsSync(keyFile)) {
+    console.warn("Calendar key file missing:", keyFile);
+    return null;
+  }
   return new google.auth.GoogleAuth({
     keyFile,
     scopes: CALENDAR_SCOPES,
@@ -322,15 +336,14 @@ async function insertGoogleCalendarEvent({
 }) {
   const calendarId = process.env.GOOGLE_CALENDAR_ID;
   const userAuth = getUserCalendarAuth();
-  const auth = userAuth || getCalendarAuth();
+  const serviceAuth = getCalendarAuth();
   const start = manilaLocalDateTime(callDate, callTime, 0);
   const end = manilaLocalDateTime(callDate, callTime, 30);
-  if (!calendarId || !auth || !start || !end) return { skipped: true };
+  if (!calendarId || (!userAuth && !serviceAuth) || !start || !end) return { skipped: true };
 
   const busy = await listBusyCallLabels(callDate);
   if (busy.includes(callTime)) return { busy: true };
 
-  const calendar = google.calendar({ version: "v3", auth });
   const copy = callEventCopy({
     fullName,
     email,
@@ -341,8 +354,7 @@ async function insertGoogleCalendarEvent({
     timeline,
     message,
   });
-  const useMeet = Boolean(userAuth);
-  const requestBody = {
+  const baseEvent = {
     summary: copy.title,
     description: copy.html,
     start,
@@ -356,27 +368,48 @@ async function insertGoogleCalendarEvent({
       ],
     },
   };
-  if (useMeet) {
-    requestBody.attendees = [{ email }];
-    requestBody.conferenceData = {
-      createRequest: {
-        requestId: `elopre-${crypto.randomUUID()}`,
-        conferenceSolutionKey: { type: "hangoutsMeet" },
-      },
-    };
-  }
 
-  const { data } = await calendar.events.insert({
-    calendarId,
-    conferenceDataVersion: useMeet ? 1 : 0,
-    sendUpdates: useMeet ? "all" : "none",
-    requestBody,
-  });
-  const meetLink =
-    data.hangoutLink ||
-    data.conferenceData?.entryPoints?.find((entry) => entry.entryPointType === "video")?.uri ||
-    "";
-  return { id: data.id, meetLink };
+  const writeEvent = async (auth, requestBody, useMeet) => {
+    const calendar = google.calendar({ version: "v3", auth });
+    const { data } = await calendar.events.insert({
+      calendarId,
+      conferenceDataVersion: useMeet ? 1 : 0,
+      sendUpdates: useMeet ? "all" : "none",
+      requestBody,
+    });
+    const meetLink =
+      data.hangoutLink ||
+      data.conferenceData?.entryPoints?.find((entry) => entry.entryPointType === "video")?.uri ||
+      "";
+    return { id: data.id, meetLink };
+  };
+
+  try {
+    if (userAuth) {
+      try {
+        return await writeEvent(
+          userAuth,
+          {
+            ...baseEvent,
+            attendees: [{ email }],
+            conferenceData: {
+              createRequest: {
+                requestId: `elopre-${crypto.randomUUID()}`,
+                conferenceSolutionKey: { type: "hangoutsMeet" },
+              },
+            },
+          },
+          true
+        );
+      } catch (meetErr) {
+        console.error("Meet insert failed, retrying without Meet:", meetErr.message || meetErr);
+      }
+    }
+    return await writeEvent(userAuth || serviceAuth, baseEvent, false);
+  } catch (error) {
+    console.error("Google Calendar insert failed:", error.message || error);
+    return { skipped: true };
+  }
 }
 
 // Validate input
@@ -584,13 +617,10 @@ app.post("/api/contact", async (req, res) => {
         });
       }
       if (cal?.id) console.log("Google Calendar event created");
-      else if (cal?.skipped) console.warn("Google Calendar skipped: missing calendar id or key");
+      else if (cal?.skipped) console.warn("Google Calendar skipped: missing credentials or insert failed");
       meetLink = cal?.meetLink || "";
     } catch (calErr) {
       console.error("Google Calendar insert failed:", calErr.message || calErr);
-      return res.status(500).json({
-        message: "Unable to book that call time right now. Please try another slot or email instead.",
-      });
     }
   }
 
