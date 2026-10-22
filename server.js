@@ -460,6 +460,12 @@ function getFromAddress() {
   return `${fromName} <${fromEmail}>`;
 }
 
+function canSendResendTo(to) {
+  const fromEmail = (process.env.CONTACT_FROM || "onboarding@resend.dev").toLowerCase();
+  if (!fromEmail.includes("resend.dev")) return true;
+  return toSafeString(to).toLowerCase() === toSafeString(process.env.CONTACT_TO).toLowerCase();
+}
+
 app.get("/api/calendar/oauth", (req, res) => {
   if (!ownerOAuthGate(req)) return res.status(404).end();
   const oauth2 = getOAuth2Client();
@@ -796,7 +802,9 @@ app.post("/api/contact", async (req, res) => {
       });
     }
     console.log("Contact email sent:", data?.id || "ok");
-    if (method === "call" && meetLink) {
+    if (method === "call" && meetLink && !canSendResendTo(email)) {
+      console.log("Client Meet email skipped: verify a Resend domain to email guests. Google Calendar invite still sent.");
+    } else if (method === "call" && meetLink) {
       try {
         const clientMail = await resend.emails.send({
           from: getFromAddress(),
