@@ -38,7 +38,8 @@
 | Area | Files |
 |------|--------|
 | Home / bento / projects / about / contact | `index.html`, `css/styles.css`, `js/main.js` |
-| Contact form + send overlay | `js/main.js`, `server.js` (`POST /api/contact`) |
+| Services | `#panel-services` in `index.html` + `.services-grid` in `css/styles.css` — 4 checklist cards (Web, Mobile, Desktop, AI & Algorithm). Contact + studio use the same 04 name. |
+| Contact form + send overlay | `#panel-contact` in `index.html`, `js/main.js`, `server.js` (`POST /api/contact` via Resend). Schedule a call writes a 30-min Asia/Manila event on the Jhon Elopre Google Calendar (`eloprepotchy@gmail.com`) via a service account, and still attaches an ICS invite to the email. |
 | Resume download overlay | `js/main.js` → `assets/documents/Junior-Programmer-Elopre-Jhon.pdf` |
 | Chat widget | `js/main.js` → `POST /api/chat` → Gemini (`GEMINI_API_KEY`) or `js/resumeChatbot.js` |
 | Inquiry email HTML | `server.js` (logo: `assets/images/brand/logonobg.png` on GitHub Pages) |
@@ -48,10 +49,13 @@
 ## Preserve notes
 - Keep root `index.html` so GitHub Pages continues to work.
 - Keep `server.js` at repo root for Render `npm start`.
-- Do not commit `.env`, `contracts/`, or `nodejs.msi`. Chat uses `GEMINI_API_KEY` on Render; never put the key in frontend JS.
+- Do not commit `.env`, `contracts/`, `Calendar/` (service-account JSON), or `nodejs.msi`. Chat uses `GEMINI_API_KEY` on Render; never put the key in frontend JS.
 - Client agreement studio: `Ctrl+Shift+A` or chat “contract” / “agreement” / “kontrata” opens `/studio` (password still required). Login is a split-shell card (`loginPage()` in `js/contractStudio.js`); Back to portfolio goes to `/` on the same host. The form is the 3-column generator. Print / PDF fills `templates/Agreement.pdf` via `scripts/fill_agreement.py` (PyMuPDF). Downloaded PDF is `{client-name}-agreement.pdf`. Writes one fitted line in each white Project Details cell so text does not spill onto the navy headers. pdf-lib in `js/fillAgreementPdf.js` is the fallback. Jhon emails the filled file.
 - CORS must allow `elopre.dev`, `www.elopre.dev`, and `eloprejhon713.github.io` so Pages can call Render.
 - Mobile: real phone width must work; no “Desktop site” workaround.
+- Services (`#panel-services`) is 4 checklist cards. Do not restyle other panels when changing Services. Phone width stacks cards and lists to one column. Each checklist row uses the same pale chip hover (`#f1f5f9`, 12px radius).
+- Tech Stack (`#panel-stack`) pills use Simple Icons (`cdn.simpleicons.org/{slug}/1e3a8a`). LSTM and Matplotlib have no brand mark there — keep the inline navy SVGs. The Home “Tools I work with” ticker uses the same set, including the AI / data-science chips.
 - Contact phone field: exactly 11 digits.
+- Contact (`#panel-contact`) is the split info + form card. Do not restyle other panels when changing Contact. Phone width stacks the two columns. Send still uses `POST /api/contact` / Resend. “Schedule a call” inserts a 30-minute Asia/Manila event on `GOOGLE_CALENDAR_ID` (Jhon Elopre / `eloprepotchy@gmail.com`) with `googleapis` + the local service-account JSON. ICS stays as an email attachment. On Render set `GOOGLE_SERVICE_ACCOUNT_JSON` (one-line JSON) and share that calendar with `portfolio-calendar@gmp-demo-project-907641364.iam.gserviceaccount.com` as Make changes to events. Never commit the key.
 - Brand images live under `assets/images/brand/` — update email `logoUrl` if moved again.
 - About GitHub graph is a custom heatmap (`.gh-activity` in `index.html` / `css/styles.css`, rendered by `js/main.js`). Data from `github-contributions-api.jogruber.de` for `eloprejhon713`. Keep it scrollable on phones.

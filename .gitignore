@@ -1,6 +1,9 @@
 node_modules/
 .env
 contracts/
+Calendar/
+*.iam.gserviceaccount.com.json
+*-0cdee89a8fc1.json
 assets/documents/Agreement.pdf
 _inspect-pdf.mjs
 nodejs.msi

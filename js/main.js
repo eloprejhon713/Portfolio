@@ -411,6 +411,27 @@
     });
   }
 
+  const callBox = document.getElementById('callBox');
+  const callDate = document.getElementById('callDate');
+  const msgCount = document.getElementById('msgCount');
+  const messageBox = document.getElementById('message');
+  if (callDate) {
+    const min = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+    callDate.min = min;
+  }
+  if (messageBox && msgCount) {
+    messageBox.addEventListener('input', () => {
+      msgCount.textContent = String(messageBox.value.length);
+    });
+  }
+  document.querySelectorAll('input[name="method"]').forEach((radio) => {
+    radio.addEventListener('change', () => {
+      const call = document.querySelector('input[name="method"]:checked')?.value === 'call';
+      if (callBox) callBox.hidden = !call;
+      if (callDate) callDate.required = call;
+    });
+  });
+
   async function handleSubmit(e) {
     e.preventDefault();
     const form = e.target;
@@ -422,14 +443,31 @@
       openSiteModal('error', 'Invalid contact number', 'Please enter a valid 11-digit contact number.');
       return;
     }
+    const method = document.querySelector('input[name="method"]:checked')?.value || 'email';
+    const callTime = document.querySelector('input[name="callTime"]:checked')?.value || '';
+    if (method === 'call' && (!callDate?.value || !callTime)) {
+      openSiteModal('error', 'Pick a call slot', 'Please choose a future date and time for the call.');
+      return;
+    }
+    if (!document.getElementById('consent')?.checked) {
+      openSiteModal('error', 'Privacy notice', 'Please accept the privacy notice to continue.');
+      return;
+    }
 
     const payload = {
       firstName: document.getElementById('fname').value.trim(),
       lastName:  document.getElementById('lname').value.trim(),
       email:     document.getElementById('email').value.trim(),
       phone,
+      company:   document.getElementById('company')?.value.trim() || '',
       service:   document.getElementById('service').value,
-      message:   document.getElementById('message').value.trim()
+      budget:    document.getElementById('budget')?.value || '',
+      timeline:  document.getElementById('timeline')?.value || '',
+      method,
+      callDate:  callDate?.value || '',
+      callTime,
+      message:   document.getElementById('message').value.trim(),
+      consent:   true,
     };
     btn.disabled = true;
     showSendLoader();
@@ -442,13 +480,23 @@
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.message || 'Failed to send message.');
       form.reset();
-      openSiteModal('success', 'Message sent!', "Thanks for reaching out — I'll get back to you soon.");
+      if (callBox) callBox.hidden = true;
+      if (msgCount) msgCount.textContent = '0';
+      openSiteModal(
+        'success',
+        method === 'call' ? 'Call requested!' : 'Message sent!',
+        method === 'call'
+          ? "Thanks — the inquiry is in my inbox and the call is on my Google Calendar. I'll confirm by email."
+          : "Thanks for reaching out — I'll get back to you soon."
+      );
     } catch (err) {
       openSiteModal('error', 'Unable to send', err.message || 'Please try again in a moment, or email me directly at eloprepotchy@gmail.com.');
     } finally {
       btn.disabled = false;
     }
   }
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) contactForm.addEventListener('submit', handleSubmit);
 
   /* ── CHATBOT ── */
   /* Intent-scored resume Q&A (resumeChatbot.js); first person as Jhon */

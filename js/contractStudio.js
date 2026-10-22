@@ -12,7 +12,7 @@ const SERVICES = [
   "Web Development",
   "Mobile Development",
   "Desktop Development",
-  "Algorithm Design",
+  "AI & Algorithm Development",
 ];
 
 function configured() {

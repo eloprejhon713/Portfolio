@@ -1,5 +1,6 @@
 const path = require("path");
 const express = require("express");
+const { google } = require("googleapis");
 const { Resend } = require("resend");
 require("dotenv").config();
 
@@ -68,6 +69,160 @@ function escapeHtml(value) {
     .replace(/'/g, "&#039;");
 }
 
+const CALL_SLOTS = {
+  "9:00 AM": [9, 0],
+  "10:00 AM": [10, 0],
+  "11:00 AM": [11, 0],
+  "1:00 PM": [13, 0],
+  "2:00 PM": [14, 0],
+  "3:00 PM": [15, 0],
+  "4:00 PM": [16, 0],
+};
+
+function manilaCallWindow(dateStr, timeLabel) {
+  const hm = CALL_SLOTS[timeLabel];
+  if (!hm || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+  const [year, month, day] = dateStr.split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1, day, hm[0] - 8, hm[1], 0));
+  const end = new Date(start.getTime() + 30 * 60 * 1000);
+  if (Number.isNaN(start.getTime())) return null;
+  return { start, end };
+}
+
+function icsUtc(date) {
+  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
+}
+
+function icsEscape(value) {
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+}
+
+function buildCallInvite({ ownerEmail, fullName, email, phone, service, message, callDate, callTime }) {
+  const window = manilaCallWindow(callDate, callTime);
+  if (!window) return null;
+  const uid = `${Date.now()}-${Math.random().toString(36).slice(2, 10)}@elopre.dev`;
+  const summary = `Call with ${fullName} — ${service}`;
+  const desc = [
+    "Inquiry call booked from elopre.dev",
+    `Client: ${fullName}`,
+    `Email: ${email}`,
+    `Phone: ${phone}`,
+    `Service: ${service}`,
+    "",
+    message,
+  ].join("\n");
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//elopre.dev//Contact//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:REQUEST",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${icsUtc(new Date())}`,
+    `DTSTART:${icsUtc(window.start)}`,
+    `DTEND:${icsUtc(window.end)}`,
+    `SUMMARY:${icsEscape(summary)}`,
+    `DESCRIPTION:${icsEscape(desc)}`,
+    `ORGANIZER;CN=Jhon Elopre:mailto:${ownerEmail}`,
+    `ATTENDEE;CN=${icsEscape(fullName)};RSVP=TRUE:mailto:${email}`,
+    `ATTENDEE;CN=Jhon Elopre;PARTSTAT=ACCEPTED:mailto:${ownerEmail}`,
+    "LOCATION:Phone / WhatsApp +63 936 988 1562",
+    "STATUS:CONFIRMED",
+    "SEQUENCE:0",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+  return {
+    ics,
+    label: `${callDate} at ${callTime} (Asia/Manila, 30 min)`,
+  };
+}
+
+function manilaLocalDateTime(dateStr, timeLabel, extraMin = 0) {
+  const hm = CALL_SLOTS[timeLabel];
+  if (!hm || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return null;
+  const minutes = hm[0] * 60 + hm[1] + extraMin;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return {
+    dateTime: `${dateStr}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`,
+    timeZone: "Asia/Manila",
+  };
+}
+
+function getCalendarAuth() {
+  const raw = process.env.GOOGLE_SERVICE_ACCOUNT_JSON;
+  if (raw) {
+    const creds = JSON.parse(raw);
+    return new google.auth.JWT({
+      email: creds.client_email,
+      key: String(creds.private_key || "").replace(/\\n/g, "\n"),
+      scopes: ["https://www.googleapis.com/auth/calendar"],
+    });
+  }
+  const keyPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+  if (!keyPath) return null;
+  const keyFile = path.isAbsolute(keyPath) ? keyPath : path.resolve(__dirname, keyPath);
+  return new google.auth.GoogleAuth({
+    keyFile,
+    scopes: ["https://www.googleapis.com/auth/calendar"],
+  });
+}
+
+async function insertGoogleCalendarEvent({
+  fullName,
+  email,
+  phone,
+  service,
+  company,
+  budget,
+  timeline,
+  message,
+  callDate,
+  callTime,
+}) {
+  const calendarId = process.env.GOOGLE_CALENDAR_ID;
+  const auth = getCalendarAuth();
+  const start = manilaLocalDateTime(callDate, callTime, 0);
+  const end = manilaLocalDateTime(callDate, callTime, 30);
+  if (!calendarId || !auth || !start || !end) return { skipped: true };
+
+  const calendar = google.calendar({ version: "v3", auth });
+  const description = [
+    "Inquiry call booked from elopre.dev",
+    `Client: ${fullName}`,
+    `Email: ${email}`,
+    `Phone: ${phone}`,
+    `Service: ${service}`,
+    company ? `Company: ${company}` : "",
+    budget ? `Budget: ${budget}` : "",
+    timeline ? `Timeline: ${timeline}` : "",
+    "",
+    message,
+  ]
+    .filter((line, index, lines) => line || lines[index - 1])
+    .join("\n");
+
+  const { data } = await calendar.events.insert({
+    calendarId,
+    sendUpdates: "none",
+    requestBody: {
+      summary: `Call with ${fullName} — ${service}`,
+      description,
+      start,
+      end,
+      location: "Phone / WhatsApp +63 936 988 1562",
+      reminders: { useDefault: true },
+    },
+  });
+  return { id: data.id };
+}
+
 // Validate input
 function validateInput(body) {
   const firstName = toSafeString(body.firstName);
@@ -76,9 +231,19 @@ function validateInput(body) {
   const phone = toSafeString(body.phone).replace(/\D/g, "");
   const service = toSafeString(body.service) || "Not specified";
   const message = toSafeString(body.message);
+  const company = toSafeString(body.company);
+  const budget = toSafeString(body.budget);
+  const timeline = toSafeString(body.timeline);
+  const method = toSafeString(body.method) === "call" ? "call" : "email";
+  const callDate = toSafeString(body.callDate);
+  const callTime = toSafeString(body.callTime);
+  const consent = body.consent === true || body.consent === "true" || body.consent === "on";
 
   if (!firstName || !lastName || !email || !phone || !message) {
     return { error: "Please complete all required fields." };
+  }
+  if (!consent) {
+    return { error: "Please accept the privacy notice to continue." };
   }
 
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -90,11 +255,37 @@ function validateInput(body) {
     return { error: "Please provide a valid 11-digit contact number." };
   }
 
+  if (message.length < 10) {
+    return { error: "Please tell me a little about your project." };
+  }
+
   if (message.length > 4000) {
     return { error: "Message is too long. Please keep it under 4000 characters." };
   }
 
-  return { data: { firstName, lastName, email, phone, service, message } };
+  if (method === "call") {
+    const window = manilaCallWindow(callDate, callTime);
+    if (!window || window.start.getTime() < Date.now() + 2 * 60 * 60 * 1000) {
+      return { error: "Please choose a future date and time for the call." };
+    }
+  }
+
+  return {
+    data: {
+      firstName,
+      lastName,
+      email,
+      phone,
+      service,
+      message,
+      company,
+      budget,
+      timeline,
+      method,
+      callDate,
+      callTime,
+    },
+  };
 }
 
 // Check if Resend email config exists (HTTPS API — works on Render; Gmail SMTP times out there)
@@ -126,7 +317,20 @@ app.post("/api/contact", async (req, res) => {
     });
   }
 
-  const { firstName, lastName, email, phone, service, message } = validated.data;
+  const {
+    firstName,
+    lastName,
+    email,
+    phone,
+    service,
+    message,
+    company,
+    budget,
+    timeline,
+    method,
+    callDate,
+    callTime,
+  } = validated.data;
   const fullName = `${firstName} ${lastName}`.trim();
   const initials = `${(firstName[0] || "").toUpperCase()}${(lastName[0] || "").toUpperCase()}` || "?";
   const replyName = (firstName || fullName.split(/\s+/)[0] || "guest").toLowerCase();
@@ -140,12 +344,39 @@ app.post("/api/contact", async (req, res) => {
   const year = new Date().getFullYear();
   const logoUrl = "https://eloprejhon713.github.io/Portfolio/assets/images/brand/logonobg.png";
 
+  const ownerEmail = process.env.CONTACT_TO;
+  const invite =
+    method === "call"
+      ? buildCallInvite({
+          ownerEmail,
+          fullName,
+          email,
+          phone,
+          service,
+          message,
+          callDate,
+          callTime,
+        })
+      : null;
+
+  const extraLines = [
+    company ? `Company: ${company}` : "",
+    budget ? `Budget: ${budget}` : "",
+    timeline ? `Timeline: ${timeline}` : "",
+    `Reach me: ${method === "call" ? "Schedule a call" : "Reply by email"}`,
+    invite ? `Call: ${invite.label}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
   const mailOptions = {
   from: getFromAddress(),
-  to: process.env.CONTACT_TO,
+  to: ownerEmail,
   replyTo: email,
-  subject: `New Inquiry from ${fullName} — ${service}`,
-  text: `New Client Inquiry\n\nName: ${fullName}\nEmail: ${email}\nContact Number: ${phone}\nService: ${service}\n\nMessage:\n${message}\n\n---\nSent via elopre.dev contact form`,
+  subject: invite
+    ? `Call request from ${fullName} — ${service}`
+    : `New Inquiry from ${fullName} — ${service}`,
+  text: `New Client Inquiry\n\nName: ${fullName}\nEmail: ${email}\nContact Number: ${phone}\nService: ${service}\n${extraLines}\n\nMessage:\n${message}\n\n---\nSent via elopre.dev contact form`,
   html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -235,6 +466,10 @@ app.post("/api/contact", async (req, res) => {
                       <span style="color:#2563eb;">"contact"</span><span style="color:#64748b;">:</span>
                       <a href="tel:${escapeHtml(phone)}" style="color:#16a34a;text-decoration:none;">"${escapeHtml(phone)}"</a><span style="color:#64748b;">,</span>
                     </div>
+                    ${company ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"company"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(company)}"</span><span style="color:#64748b;">,</span></div>` : ""}
+                    ${budget ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"budget"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(budget)}"</span><span style="color:#64748b;">,</span></div>` : ""}
+                    ${timeline ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"timeline"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(timeline)}"</span><span style="color:#64748b;">,</span></div>` : ""}
+                    ${invite ? `<div style="padding-left:6px;"><span style="color:#2563eb;">"call"</span><span style="color:#64748b;">:</span> <span style="color:#16a34a;">"${escapeHtml(invite.label)}"</span><span style="color:#64748b;">,</span></div>` : ""}
                     <div style="padding-left:6px;">
                       <span style="color:#2563eb;">"interest"</span><span style="color:#64748b;">:</span>
                     </div>
@@ -318,6 +553,15 @@ app.post("/api/contact", async (req, res) => {
 </html>
   `,
 };
+  if (invite) {
+    mailOptions.attachments = [
+      {
+        filename: "elopre-call.ics",
+        content: Buffer.from(invite.ics, "utf8").toString("base64"),
+        contentType: "text/calendar; method=REQUEST; charset=UTF-8",
+      },
+    ];
+  }
 
   try {
     const { data, error } = await resend.emails.send(mailOptions);
@@ -328,6 +572,26 @@ app.post("/api/contact", async (req, res) => {
       });
     }
     console.log("Contact email sent:", data?.id || "ok");
+    if (method === "call") {
+      try {
+        const cal = await insertGoogleCalendarEvent({
+          fullName,
+          email,
+          phone,
+          service,
+          company,
+          budget,
+          timeline,
+          message,
+          callDate,
+          callTime,
+        });
+        if (cal?.id) console.log("Google Calendar event created");
+        else if (cal?.skipped) console.warn("Google Calendar skipped: missing calendar id or key");
+      } catch (calErr) {
+        console.error("Google Calendar insert failed:", calErr.message || calErr);
+      }
+    }
     return res.status(200).json({ message: "Message sent successfully." });
   } catch (error) {
     console.error("Failed to send contact email:", error);

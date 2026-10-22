@@ -430,7 +430,7 @@
     display: flex;
     width: max-content;
     gap: 0;
-    animation: toolsScroll 22s linear infinite;
+    animation: toolsScroll 40s linear infinite;
   }
   .tools-marquee:hover .tools-track { animation-play-state: paused; }
   .tools-row {
@@ -444,13 +444,16 @@
     font-size: 0.78rem; font-weight: 500; color: var(--navy);
     white-space: nowrap;
   }
-  .tool-chip img { width: 16px; height: 16px; }
+  .tool-chip img,
+  .tool-chip svg { width: 16px; height: 16px; flex: none; }
   @keyframes toolsScroll {
     from { transform: translateX(0); }
     to   { transform: translateX(-50%); }
   }
   @media (prefers-reduced-motion: reduce) {
     .tools-track { animation: none; }
+    .service-item, .service-item::after, .service-list li { transition: none !important; }
+    .service-item:hover { transform: none; }
   }
 
   /* Bento */
@@ -821,21 +824,123 @@
 
   /* Services grid */
   .services-grid {
-    display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
   }
   .service-item {
-    padding: 1.35rem; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--off-white);
-    transition: border-color .2s, background .2s;
+    position: relative;
+    padding: 2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--white);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: transform .25s, box-shadow .25s, border-color .25s;
   }
-  .service-item:hover { border-color: var(--blue-soft); background: var(--white); }
-  .service-num { font-size: 0.75rem; font-weight: 700; color: var(--blue); margin-bottom: 0.75rem; }
-  .service-icon {
-    width: 40px; height: 40px; stroke: var(--navy-light); fill: none; stroke-width: 1.4;
-    margin-bottom: 0.85rem;
+  .service-item::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--blue), var(--blue-soft));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .35s;
   }
-  .service-name { font-size: 1.05rem; font-weight: 700; color: var(--navy); margin-bottom: 0.45rem; }
-  .service-desc { font-size: 0.88rem; color: var(--text-muted); line-height: 1.6; }
+  .service-item:hover {
+    transform: translateY(-4px);
+    border-color: var(--blue-soft);
+    box-shadow: 0 18px 40px rgba(37, 99, 235, 0.16);
+  }
+  .service-item:hover::after { transform: scaleX(1); }
+  .service-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+  .service-ico {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    color: #fff;
+    background: linear-gradient(135deg, var(--navy-mid), var(--blue));
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.16);
+    flex: none;
+  }
+  .service-ico svg {
+    width: 28px;
+    height: 28px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .service-meta { display: flex; align-items: center; gap: 0.75rem; }
+  .service-count {
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--blue-pale);
+    color: var(--blue);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .service-num {
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0;
+  }
+  .service-name {
+    margin: 1.4rem 0 0.45rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--navy);
+  }
+  .service-desc {
+    margin: 0 0 1.4rem;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .service-list {
+    list-style: none;
+    margin: 0;
+    padding: 1.4rem 0 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 16px;
+  }
+  .service-list li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 0.86rem;
+    color: var(--text);
+    line-height: 1.35;
+    cursor: default;
+    transition: background .2s;
+  }
+  #panel-services .service-item .service-list li:hover {
+    background: #f1f5f9;
+  }
+  .service-list li::before {
+    content: "";
+    flex: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--blue-pale) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232563eb' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4 8-9'/%3E%3C/svg%3E") center/11px no-repeat;
+  }
 
   /* Stack */
   .stack-categories { display: flex; flex-direction: column; gap: 1.15rem; }
@@ -851,7 +956,8 @@
     font-size: 0.82rem; font-weight: 500; color: var(--navy);
   }
   .pill-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; }
-  .pill-icon img { width: 18px; height: 18px; object-fit: contain; }
+  .pill-icon img,
+  .pill-icon svg { width: 18px; height: 18px; object-fit: contain; }
 
   /* About panel */
   .about-grid {
@@ -1269,8 +1375,33 @@
   .contact-info p {
     color: var(--text-muted); font-size: 0.92rem; line-height: 1.65; margin: 0.75rem 0 1.25rem;
   }
+  .contact-badges { margin-bottom: 1.15rem; }
+  .contact-status {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 7px 14px; border-radius: 999px;
+    background: rgba(22, 163, 74, 0.1); color: #16a34a;
+    font-size: 0.8rem; font-weight: 600;
+  }
+  .contact-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #16a34a;
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.2);
+  }
+  .contact-resp { margin: 10px 0 0; color: var(--text-muted); font-size: 0.82rem; }
+  .contact-lbl {
+    margin: 1.15rem 0 0.55rem;
+    font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .contact-quick { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .contact-quick svg {
+    width: 16px; height: 16px; fill: none; stroke: currentColor;
+    stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .contact-wa { color: #16a34a; }
+  .contact-msg { color: #0084ff; }
   .contact-details { display: flex; flex-direction: column; gap: 0.85rem; margin-bottom: 1.25rem; }
-  .contact-detail { display: flex; gap: 0.75rem; align-items: flex-start; }
+  .contact-detail { display: flex; gap: 0.75rem; align-items: flex-start; text-decoration: none; color: inherit; border-radius: 14px; padding: 6px; margin: -6px; }
+  a.contact-detail:hover { background: var(--surface); }
   .cd-icon {
     width: 38px; height: 38px; border-radius: 10px; background: var(--blue-pale);
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -1284,7 +1415,9 @@
     padding: 0.45rem 0.8rem; border-radius: 999px;
     border: 1px solid var(--border); background: var(--off-white);
     text-decoration: none; font-size: 0.8rem; font-weight: 500; color: var(--navy);
+    transition: transform .2s, border-color .2s;
   }
+  .social-pill:hover { transform: translateY(-2px); border-color: var(--blue-soft); }
   .social-icon { width: 14px; height: 14px; }
   .form-title { font-size: 1.1rem; font-weight: 700; color: var(--navy); margin-bottom: 1rem; }
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.85rem; }
@@ -1293,6 +1426,49 @@
     display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted);
     margin-bottom: 0.35rem;
   }
+  .form-group label i { color: #dc2626; font-style: normal; }
+  .form-count { margin-top: 5px; text-align: right; color: var(--text-muted); font-size: 0.75rem; }
+  .contact-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .contact-seg label { cursor: pointer; margin: 0; }
+  .contact-seg input { position: absolute; opacity: 0; width: 0; }
+  .contact-seg span {
+    display: flex; align-items: center; justify-content: center;
+    padding: 11px; border: 1px solid var(--border-dark); border-radius: 14px;
+    background: var(--off-white); font-size: 0.84rem; font-weight: 600; color: var(--text-muted);
+    transition: all .2s;
+  }
+  .contact-seg input:checked + span {
+    background: var(--blue-pale); border-color: var(--blue); color: var(--blue);
+  }
+  .contact-call {
+    padding: 14px; border-radius: 16px; background: var(--surface);
+    border: 1px dashed var(--blue-soft); margin-bottom: 0.85rem;
+  }
+  .contact-slots { display: flex; flex-wrap: wrap; gap: 8px; }
+  .contact-slots label { cursor: pointer; margin: 0; }
+  .contact-slots input { position: absolute; opacity: 0; width: 0; }
+  .contact-slots span {
+    display: block; padding: 8px 13px; border: 1px solid var(--border);
+    border-radius: 10px; font-size: 0.84rem; background: var(--white);
+  }
+  .contact-slots input:checked + span {
+    background: var(--blue); border-color: var(--blue); color: #fff;
+  }
+  .contact-privacy {
+    display: flex; gap: 12px; padding: 14px 16px; border-radius: 14px;
+    background: var(--surface); color: var(--text-muted); font-size: 0.82rem;
+    margin-bottom: 0.85rem;
+  }
+  .contact-privacy svg {
+    width: 18px; height: 18px; flex: none; margin-top: 2px;
+    fill: none; stroke: var(--blue); stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .contact-consent {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 0.84rem; color: var(--text-muted); margin-bottom: 0.9rem; cursor: pointer;
+  }
+  .contact-consent input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--blue); }
+  .contact-consent i { color: #dc2626; font-style: normal; }
   .form-group input, .form-group select, .form-group textarea {
     width: 100%; padding: 0.7rem 0.9rem; border-radius: 12px;
     border: 1px solid var(--border-dark); background: var(--off-white);
@@ -1770,7 +1946,11 @@
     }
     .bento { grid-template-columns: 1fr; }
     .services-grid, .about-grid, .contact-grid, .projects-grid { grid-template-columns: 1fr; }
+    #panel-services .service-item { padding: 1.4rem; }
+    #panel-services .service-list { grid-template-columns: 1fr; }
+    #panel-services .service-item:hover { transform: none; }
     .form-row { grid-template-columns: 1fr; }
+    .contact-seg { grid-template-columns: 1fr; }
     #chat-window { width: calc(100vw - 2rem); right: 1rem; bottom: 5.5rem; }
     #chat-toggle { right: 1rem; bottom: 1rem; }
   }
